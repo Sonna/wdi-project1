@@ -11,7 +11,7 @@ var running = true;
 var winner = '';
 
 var board = document.querySelector('.board');
-// var cells = document.querySelectorAll('.cell');
+var cells = document.querySelectorAll('.cell');
 var rows = document.querySelectorAll('.row');
 
 var winnerEl = document.querySelector('.winner');
@@ -60,10 +60,19 @@ function checkDiagonals(player) {
   );
 }
 
+function allCellsFull() {
+  return [].every.call(cells, function(cell) {
+    return cell.classList.contains('naught') || cell.classList.contains('cross');
+  });
+}
+
 function checkForWinner(player) {
   if (checkCols(player) || checkRows(player) || checkDiagonals(player)) {
     winner = player;
     winnerEl.textContent = winner + ' Wins!';
+    running = false;
+  } else if (allCellsFull()) {
+    winnerEl.textContent = 'Draw!';
     running = false;
   }
 }
