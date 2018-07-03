@@ -56,7 +56,7 @@ function checkRows(player) {
 function checkDiagonals(player) {
   return (
     rows[0].children[0].classList.contains(player) && rows[1].children[1].classList.contains(player) && rows[2].children[2].classList.contains(player) ||
-    rows[2].children[0].classList.contains(player) && rows[1].children[1].classList.contains(player) && rows[2].children[0].classList.contains(player)
+    rows[2].children[0].classList.contains(player) && rows[1].children[1].classList.contains(player) && rows[0].children[2].classList.contains(player)
   );
 }
 
