@@ -4,9 +4,14 @@ var rounds = 0;
 var players = {
   active: 'naught',
   inactive: 'cross'
-}
+};
+
+var wins = {
+  naught: 0,
+  cross: 0
+};
+
 var running = true;
-var winner = '';
 
 var board = document.querySelector('.board');
 var cells = document.querySelectorAll('.cell');
@@ -16,6 +21,10 @@ var roundsEl = document.querySelector('.rounds');
 var detailsEl = document.querySelector('.details');
 var resetBtn = document.querySelector('button.reset');
 var winnerEl = document.querySelector('.winner');
+
+var winsEl = document.querySelector('.wins');
+var naughtWinsEl = winsEl.querySelector('.naught');
+var crossWinsEl = winsEl.querySelector('.cross');
 
 var possibleWinStates = {
   majorDiagonal: { draw: false, cells: [rows[0].children[0], rows[2].children[2]] },
@@ -88,10 +97,17 @@ function allCellsFull() {
   });
 }
 
+function updateWins(winner) {
+  winnerEl.textContent = winner + ' Wins!';
+  wins[winner]++;
+
+  naughtWinsEl.textContent = wins.naught;
+  crossWinsEl.textContent = wins.cross;
+}
+
 function checkForWinner(player) {
   if (checkCols(player) || checkRows(player) || checkDiagonals(player)) {
-    winner = player;
-    winnerEl.textContent = winner + ' Wins!';
+    updateWins(player);
     running = false;
     detailsEl.classList.remove('hidden');
     drawWinningLine();

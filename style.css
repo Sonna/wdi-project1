@@ -5,6 +5,16 @@ body {
   font-family: 'Open Sans', 'Helvetica', 'Arial', sans-serif;
 }
 
+.board .naught:before {
+  color: blue;
+  content: 'O';
+}
+
+.board .cross:before {
+  color: red;
+  content: 'X';
+}
+
 .cell {
   background-color: white;
   display: inline-block;
@@ -14,6 +24,13 @@ body {
 
 .cell + .cell {
   border-left: 2px solid black;
+}
+
+.cross:before,
+.naught:before {
+  display: block;
+  font-size: 72px;
+  text-align: center;
 }
 
 .hidden {
@@ -32,19 +49,16 @@ body {
   border-bottom: 2px solid black;
 }
 
-.cross:before,
-.naught:before {
-  display: block;
-  font-size: 72px;
+.wins td,
+.wins th {
+  padding: 5px;
   text-align: center;
 }
 
-.naught:before {
-  color: blue;
-  content: 'O';
+.wins th {
+  border-bottom: 1px solid black;
 }
 
-.cross:before {
-  color: red;
-  content: 'X';
+.wins td + td {
+  border-left: 1px solid black;
 }

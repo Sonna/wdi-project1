@@ -437,9 +437,91 @@ function resetBoard() {
 }
 ```
 
-```css
-/* style.css */
-.scoreboard {
+12. Since a scoreboard has been built within the page, lets keep track of wins
+    as well, for either `naughts` or `crosses`
+
+```html
+<!-- indx.html -->
+<section class="scoreboard">
+  <p>Round <span class="rounds">0</span></p>
+  <table class="wins">
+    <caption>Wins</caption>
+    <tr>
+      <th>Naughts</th>
+      <th>Crosses</th>
+    </tr>
+    <tr>
+      <td class="naught">0</td>
+      <td class="cross">0</td>
+    </tr>
+  </table>
+</section>
+```
+
+```javascript
+// app.js
+var wins = {
+  naught: 0,
+  cross: 0
+};
+
+// - var winner; <-- Remove this line
+var winsEl = document.querySelector('.wins');
+var naughtWinsEl = winsEl.querySelector('.naught');
+var crossWinsEl = winsEl.querySelector('.cross');
+
+function updateWins(winner) {
+  winnerEl.textContent = winner + ' Wins!';
+  wins[winner]++;
+
+  naughtWinsEl.textContent = wins.naught;
+  crossWinsEl.textContent = wins.cross;
 }
 
+function checkForWinner(player) {
+  if (checkCols(player) || checkRows(player) || checkDiagonals(player)) {
+    updateWins(player);
+    running = false;
+    detailsEl.classList.remove('hidden');
+    drawWinningLine();
+  } else if (allCellsFull()) {
+    winnerEl.textContent = 'Draw!';
+    running = false;
+    detailsEl.classList.remove('hidden');
+  }
+}
+```
+
+```css
+/* style.css */
+.wins td,
+.wins th {
+  padding: 5px;
+  text-align: center;
+}
+
+.wins th {
+  border-bottom: 1px solid black;
+}
+
+.wins td + td {
+  border-left: 1px solid black;
+}
+```
+
+  _Update styles to keep `.board` naughts and crosses separate to `.scoreboard`
+  wins for naughts and crosses_
+
+
+```css
+/* style.css */
+.board .naught:before {
+  color: blue;
+  content: 'O';
+}
+
+.board .cross:before {
+  color: red;
+  content: 'X';
+}
 ```
