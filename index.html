@@ -9,49 +9,51 @@
   <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-  <section class="board">
-    <section class="row">
-      <div class="cell"></div>
-      <div class="cell"></div>
-      <div class="cell"></div>
+  <div class="container">
+    <section class="board">
+      <section class="row">
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+      </section>
+
+      <section class="row">
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+      </section>
+
+      <section class="row">
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+      </section>
     </section>
 
-    <section class="row">
-      <div class="cell"></div>
-      <div class="cell"></div>
-      <div class="cell"></div>
+    <section class="scoreboard">
+      <p>Round <span class="rounds">0</span></p>
+      <table class="wins">
+        <thead>
+          <caption>Wins</caption>
+        </thead>
+        <tbody>
+          <tr>
+            <th>Naughts</th>
+            <th>Crosses</th>
+          </tr>
+          <tr>
+            <td class="naught">0</td>
+            <td class="cross">0</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <footer class="details hidden">
+        <h1 class="winner"></h1>
+        <button class="reset">Clear board</button>
+      </footer>
     </section>
-
-    <section class="row">
-      <div class="cell"></div>
-      <div class="cell"></div>
-      <div class="cell"></div>
-    </section>
-  </section>
-
-  <section class="scoreboard">
-    <p>Round <span class="rounds">0</span></p>
-    <table class="wins">
-      <thead>
-        <caption>Wins</caption>
-      </thead>
-      <tbody>
-        <tr>
-          <th>Naughts</th>
-          <th>Crosses</th>
-        </tr>
-        <tr>
-          <td class="naught">0</td>
-          <td class="cross">0</td>
-        </tr>
-      </tbody>
-    </table>
-  </section>
-
-  <footer class="details hidden">
-    <h1 class="winner"></h1>
-    <button class="reset">Clear board</button>
-  <footer>
+  </div>
 
   <script type="text/javascript" src="app.js"></script>
 </body>

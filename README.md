@@ -525,3 +525,36 @@ function checkForWinner(player) {
   content: 'X';
 }
 ```
+
+13. Update styles to stack `.board` and `.scoreboard` on small screen, otherwise
+    side by side on larger screens. Also, wrap the `.board` and `.scoreboard` in
+    a `.container`, with `footer` as part of `.scoredboard`
+
+```css
+/* style.css */
+.container {
+  width: 100%;
+}
+
+@media (min-width: 600px) {
+  .container {
+    display: flex;
+    justify-content: space-around;
+  }
+}
+```
+
+```html
+<div class="container">
+  <section class="board"><!-- ... --></section>
+
+  <section class="scoreboard">
+    <!-- ... -->
+
+    <footer class="details hidden">
+      <h1 class="winner"></h1>
+      <button class="reset">Clear board</button>
+    </footer>
+  </section>
+</div>
+```

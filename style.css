@@ -26,6 +26,17 @@ body {
   border-left: 2px solid black;
 }
 
+.container {
+  width: 100%;
+}
+
+@media (min-width: 600px) {
+  .container {
+    display: flex;
+    justify-content: space-around;
+  }
+}
+
 .cross:before,
 .naught:before {
   display: block;
