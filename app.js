@@ -21,9 +21,9 @@ var possibleWinStates = {
   majorDiagonal: { draw: false, cells: [rows[0].children[0], rows[2].children[2]] },
   minorDiagonal: { draw: false, cells: [rows[0].children[2], rows[2].children[0]] },
 
-  leftRow: { draw: false, cells: [rows[0].children[0], rows[0].children[2]] },
+  topRow: { draw: false, cells: [rows[0].children[0], rows[0].children[2]] },
   middleRow: { draw: false, cells: [rows[1].children[0], rows[1].children[2]] },
-  rightRow: { draw: false, cells: [rows[2].children[0], rows[2].children[2]] },
+  bottomRow: { draw: false, cells: [rows[2].children[0], rows[2].children[2]] },
 
   leftColumn: { draw: false, cells: [rows[0].children[0], rows[2].children[0]] },
   middleColumn: { draw: false, cells: [rows[0].children[1], rows[2].children[1]] },
@@ -63,13 +63,13 @@ function checkCols(player) {
 }
 
 function checkRows(player) {
-  possibleWinStates.leftRow.draw = rows[0].children[0].classList.contains(player) && rows[0].children[1].classList.contains(player) && rows[0].children[2].classList.contains(player);
+  possibleWinStates.topRow.draw = rows[0].children[0].classList.contains(player) && rows[0].children[1].classList.contains(player) && rows[0].children[2].classList.contains(player);
   possibleWinStates.middleRow.draw = rows[1].children[0].classList.contains(player) && rows[1].children[1].classList.contains(player) && rows[1].children[2].classList.contains(player);
-  possibleWinStates.rightRow.draw = rows[2].children[0].classList.contains(player) && rows[2].children[1].classList.contains(player) && rows[2].children[2].classList.contains(player);
+  possibleWinStates.bottomRow.draw = rows[2].children[0].classList.contains(player) && rows[2].children[1].classList.contains(player) && rows[2].children[2].classList.contains(player);
   return (
-    possibleWinStates.leftRow.draw ||
+    possibleWinStates.topRow.draw ||
     possibleWinStates.middleRow.draw ||
-    possibleWinStates.rightRow.draw
+    possibleWinStates.bottomRow.draw
   );
 }
 
@@ -186,9 +186,9 @@ function connect(div1, div2, color, thickness) { // draw a line connecting eleme
 // var majorDiagonal = connect(rows[0].children[2], rows[2].children[0], 'black', 2);
 // var minorDiagonal = connect(rows[0].children[0], rows[2].children[2], 'black', 2);
 
-// var leftRow = connect(rows[0].children[0], rows[0].children[2], 'black', 2);
+// var topRow = connect(rows[0].children[0], rows[0].children[2], 'black', 2);
 // var middleRow = connect(rows[1].children[0], rows[1].children[2], 'black', 2);
-// var rightRow = connect(rows[2].children[0], rows[2].children[2], 'black', 2);
+// var bottomRow = connect(rows[2].children[0], rows[2].children[2], 'black', 2);
 
 // var leftCol = connect(rows[0].children[0], rows[2].children[0], 'black', 2);
 // var middleCol = connect(rows[0].children[1], rows[2].children[1], 'black', 2);
@@ -214,9 +214,9 @@ function connect(div1, div2, color, thickness) { // draw a line connecting eleme
 // var majorDiagonal = [rows[0].children[2], rows[2].children[0]]
 // var minorDiagonal = [rows[0].children[0], rows[2].children[2]]
 
-// var leftRow = [rows[0].children[0], rows[0].children[2]]
+// var topRow = [rows[0].children[0], rows[0].children[2]]
 // var middleRow = [rows[1].children[0], rows[1].children[2]]
-// var rightRow = [rows[2].children[0], rows[2].children[2]]
+// var bottomRow = [rows[2].children[0], rows[2].children[2]]
 
 // var leftCol = [rows[0].children[0], rows[2].children[0]]
 // var middleCol = [rows[0].children[1], rows[2].children[1]]
