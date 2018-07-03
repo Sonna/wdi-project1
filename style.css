@@ -26,3 +26,18 @@ body {
 .row:nth-child(2) .cell {
   border-bottom: 2px solid black;
 }
+
+.cross:before,
+.naught:before {
+  display: block;
+  font-size: 72px;
+  text-align: center;
+}
+
+.naught:before {
+  content: 'O';
+}
+
+.cross:before {
+  content: 'X';
+}
