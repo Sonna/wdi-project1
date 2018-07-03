@@ -1,5 +1,10 @@
 # WDI Project 1
 
+To enjoy the game of Tic Tac Toe feature within this project repository, please
+use the following link:
+
+[https://alex.sonneveld.com.au/wdi-project1/](https://alex.sonneveld.com.au/wdi-project1/)
+
 ## Steps undertaken
 
  1. Setup a new project, using boilerplate code
@@ -393,4 +398,48 @@ function drawWinningLine() {
   color: red;
   content: 'X';
 }
+```
+
+11. Look at implementing some of the bonus extensions; like
+    > * Keep track of multiple game rounds with a win counter
+
+    - Have a variable to keep track of rounds played
+    - Increase Round counter on reset or win
+    - Update Round Display after increase
+
+```html
+<!-- indx.html -->
+<section class="scoreboard">
+  <p>Round <span class="rounds">0</span></p>
+</section>
+```
+
+```javascript
+// app.js
+var rounds = 0;
+
+var roundsEl = document.querySelector('.rounds');
+
+function updateRound() {
+  rounds++;
+  roundsEl.textContent = rounds;
+}
+
+function resetBoard() {
+  cells.forEach(function(cell) {
+    cell.classList.remove('naught');
+    cell.classList.remove('cross');
+  });
+  detailsEl.classList.add('hidden');
+  document.body.removeChild(document.querySelector('.winning-move'));
+  updateRound(); // <-- This line is new
+  running = true;
+}
+```
+
+```css
+/* style.css */
+.scoreboard {
+}
+
 ```

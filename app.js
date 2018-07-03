@@ -1,7 +1,6 @@
 console.log('app.js loaded');
 
-// var playerTurn = 'naught';
-// var opponentTurn = 'cross';
+var rounds = 0;
 var players = {
   active: 'naught',
   inactive: 'cross'
@@ -13,6 +12,7 @@ var board = document.querySelector('.board');
 var cells = document.querySelectorAll('.cell');
 var rows = document.querySelectorAll('.row');
 
+var roundsEl = document.querySelector('.rounds');
 var detailsEl = document.querySelector('.details');
 var resetBtn = document.querySelector('button.reset');
 var winnerEl = document.querySelector('.winner');
@@ -109,10 +109,16 @@ function resetBoard() {
   });
   detailsEl.classList.add('hidden');
   document.body.removeChild(document.querySelector('.winning-move'));
+  updateRound();
   running = true;
 }
 
 resetBtn.addEventListener('click', resetBoard);
+
+function updateRound() {
+  rounds++;
+  roundsEl.textContent = rounds;
+}
 
 function getOffset( el ) {
   var rect = el.getBoundingClientRect();
@@ -162,70 +168,12 @@ function connect(div1, div2, color, thickness) { // draw a line connecting eleme
     "-ms-transform:rotate(" + angle + "deg); " +
     "transform:rotate(" + angle + "deg);'"
   );
-  // var htmlLine = "<div class='winning-move' style='" +
-  //   "padding:0px; " +
-  //   "margin:0px; " +
-  //   "height:" + thickness + "px; " +
-  //   "background-color:" + color + "; " +
-  //   "line-height:1px; " +
-  //   "position:absolute; " +
-  //   "left:" + cx + "px; " +
-  //   "top:" + cy + "px; " +
-  //   "width:" + length + "px; " +
-  //   "-moz-transform:rotate(" + angle + "deg); " +
-  //   "-webkit-transform:rotate(" + angle + "deg); " +
-  //   "-o-transform:rotate(" + angle + "deg); " +
-  //   "-ms-transform:rotate(" + angle + "deg); " +
-  //   "transform:rotate(" + angle + "deg);'" +
-  // " />";
-  //
-  // document.body.innerHTML += htmlLine;
   document.body.appendChild(htmlLineEl);
 }
-
-// var majorDiagonal = connect(rows[0].children[2], rows[2].children[0], 'black', 2);
-// var minorDiagonal = connect(rows[0].children[0], rows[2].children[2], 'black', 2);
-
-// var topRow = connect(rows[0].children[0], rows[0].children[2], 'black', 2);
-// var middleRow = connect(rows[1].children[0], rows[1].children[2], 'black', 2);
-// var bottomRow = connect(rows[2].children[0], rows[2].children[2], 'black', 2);
-
-// var leftCol = connect(rows[0].children[0], rows[2].children[0], 'black', 2);
-// var middleCol = connect(rows[0].children[1], rows[2].children[1], 'black', 2);
-// var rightCol = connect(rows[0].children[2], rows[2].children[2], 'black', 2);
-
-// var winStateCorners = {
-//   diagonals: {
-//     major: [rows[0].children[2], rows[2].children[0]],
-//     minor: [rows[0].children[0], rows[2].children[2]]
-//   },
-//   rows: {
-//     left: [rows[0].children[0], rows[0].children[2]],
-//     middle: [rows[1].children[0], rows[1].children[2]],
-//     right: [rows[2].children[0], rows[2].children[2]]
-//   },
-//   columns: {
-//     left: [rows[0].children[0], rows[2].children[0]],
-//     middle: [rows[0].children[1], rows[2].children[1]],
-//     right: [rows[0].children[2], rows[2].children[2]]
-//   }
-// };
-
-// var majorDiagonal = [rows[0].children[2], rows[2].children[0]]
-// var minorDiagonal = [rows[0].children[0], rows[2].children[2]]
-
-// var topRow = [rows[0].children[0], rows[0].children[2]]
-// var middleRow = [rows[1].children[0], rows[1].children[2]]
-// var bottomRow = [rows[2].children[0], rows[2].children[2]]
-
-// var leftCol = [rows[0].children[0], rows[2].children[0]]
-// var middleCol = [rows[0].children[1], rows[2].children[1]]
-// var rightCol = [rows[0].children[2], rows[2].children[2]]
 
 function drawWinningLine() {
   Object.keys(possibleWinStates).forEach(function (key) {
     if (possibleWinStates[key].draw) {
-      // console.log(possibleWinStates[key].cells[0], possibleWinStates[key].cells[1], 'black', 5);
       connect(possibleWinStates[key].cells[0], possibleWinStates[key].cells[1], 'green', 5);
     }
   });
