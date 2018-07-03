@@ -6,7 +6,6 @@ var players = {
   active: 'naught',
   inactive: 'cross'
 }
-
 var running = true;
 var winner = '';
 
@@ -17,6 +16,19 @@ var rows = document.querySelectorAll('.row');
 var detailsEl = document.querySelector('.details');
 var resetBtn = document.querySelector('button.reset');
 var winnerEl = document.querySelector('.winner');
+
+var possibleWinStates = {
+  majorDiagonal: { draw: false, cells: [rows[0].children[0], rows[2].children[2]] },
+  minorDiagonal: { draw: false, cells: [rows[0].children[2], rows[2].children[0]] },
+
+  leftRow: { draw: false, cells: [rows[0].children[0], rows[0].children[2]] },
+  middleRow: { draw: false, cells: [rows[1].children[0], rows[1].children[2]] },
+  rightRow: { draw: false, cells: [rows[2].children[0], rows[2].children[2]] },
+
+  leftColumn: { draw: false, cells: [rows[0].children[0], rows[2].children[0]] },
+  middleColumn: { draw: false, cells: [rows[0].children[1], rows[2].children[1]] },
+  rightColumn: { draw: false, cells: [rows[0].children[2], rows[2].children[2]] }
+};
 
 board.addEventListener('click', function(event) {
   if (!running) { return; }
@@ -40,25 +52,33 @@ function togglePlayerTurn() {
 }
 
 function checkCols(player) {
+  possibleWinStates.leftColumn.draw = rows[0].children[0].classList.contains(player) && rows[1].children[0].classList.contains(player) && rows[2].children[0].classList.contains(player);
+  possibleWinStates.middleColumn.draw = rows[0].children[1].classList.contains(player) && rows[1].children[1].classList.contains(player) && rows[2].children[1].classList.contains(player);
+  possibleWinStates.rightColumn.draw = rows[0].children[2].classList.contains(player) && rows[1].children[2].classList.contains(player) && rows[2].children[2].classList.contains(player);
   return (
-    rows[0].children[0].classList.contains(player) && rows[1].children[0].classList.contains(player) && rows[2].children[0].classList.contains(player) ||
-    rows[0].children[1].classList.contains(player) && rows[1].children[1].classList.contains(player) && rows[2].children[1].classList.contains(player) ||
-    rows[0].children[2].classList.contains(player) && rows[1].children[2].classList.contains(player) && rows[2].children[2].classList.contains(player)
+    possibleWinStates.leftColumn.draw ||
+    possibleWinStates.middleColumn.draw ||
+    possibleWinStates.rightColumn.draw
   );
 }
 
 function checkRows(player) {
+  possibleWinStates.leftRow.draw = rows[0].children[0].classList.contains(player) && rows[0].children[1].classList.contains(player) && rows[0].children[2].classList.contains(player);
+  possibleWinStates.middleRow.draw = rows[1].children[0].classList.contains(player) && rows[1].children[1].classList.contains(player) && rows[1].children[2].classList.contains(player);
+  possibleWinStates.rightRow.draw = rows[2].children[0].classList.contains(player) && rows[2].children[1].classList.contains(player) && rows[2].children[2].classList.contains(player);
   return (
-    rows[0].children[0].classList.contains(player) && rows[0].children[1].classList.contains(player) && rows[0].children[2].classList.contains(player) ||
-    rows[1].children[0].classList.contains(player) && rows[1].children[1].classList.contains(player) && rows[1].children[2].classList.contains(player) ||
-    rows[2].children[0].classList.contains(player) && rows[2].children[1].classList.contains(player) && rows[2].children[2].classList.contains(player)
+    possibleWinStates.leftRow.draw ||
+    possibleWinStates.middleRow.draw ||
+    possibleWinStates.rightRow.draw
   );
 }
 
 function checkDiagonals(player) {
+  possibleWinStates.majorDiagonal.draw = rows[0].children[0].classList.contains(player) && rows[1].children[1].classList.contains(player) && rows[2].children[2].classList.contains(player);
+  possibleWinStates.minorDiagonal.draw = rows[2].children[0].classList.contains(player) && rows[1].children[1].classList.contains(player) && rows[0].children[2].classList.contains(player);
   return (
-    rows[0].children[0].classList.contains(player) && rows[1].children[1].classList.contains(player) && rows[2].children[2].classList.contains(player) ||
-    rows[2].children[0].classList.contains(player) && rows[1].children[1].classList.contains(player) && rows[0].children[2].classList.contains(player)
+    possibleWinStates.majorDiagonal.draw ||
+    possibleWinStates.minorDiagonal.draw
   );
 }
 
@@ -74,6 +94,7 @@ function checkForWinner(player) {
     winnerEl.textContent = winner + ' Wins!';
     running = false;
     detailsEl.classList.remove('hidden');
+    drawWinningLine();
   } else if (allCellsFull()) {
     winnerEl.textContent = 'Draw!';
     running = false;
@@ -87,7 +108,125 @@ function resetBoard() {
     cell.classList.remove('cross');
   });
   detailsEl.classList.add('hidden');
+  document.body.removeChild(document.querySelector('.winning-move'));
   running = true;
 }
 
 resetBtn.addEventListener('click', resetBoard);
+
+function getOffset( el ) {
+  var rect = el.getBoundingClientRect();
+  return {
+    left: rect.left + window.pageXOffset,
+    top: rect.top + window.pageYOffset,
+    width: rect.width || el.offsetWidth,
+    height: rect.height || el.offsetHeight
+  };
+}
+
+// == Sourced:
+// - [javascript - How to draw a line between two divs? - Stack Overflow]
+//   (https://stackoverflow.com/questions/8672369/how-to-draw-a-line-between-two-divs)
+function connect(div1, div2, color, thickness) { // draw a line connecting elements
+  var off1 = getOffset(div1);
+  var off2 = getOffset(div2);
+  // find center of div1 (was bottom right)
+  var x1 = off1.left + off1.width/2;
+  var y1 = off1.top + off1.height/2;
+  // find center of div1 (was top right)
+  var x2 = off2.left + off2.width/2;
+  var y2 = off2.top + off2.height/2;
+  // distance
+  var length = Math.sqrt(((x2-x1) * (x2-x1)) + ((y2-y1) * (y2-y1)));
+  // center
+  var cx = ((x1 + x2) / 2) - (length / 2);
+  var cy = ((y1 + y2) / 2) - (thickness / 2);
+  // angle
+  var angle = Math.atan2((y1-y2),(x1-x2))*(180/Math.PI);
+  // make hr
+  var htmlLineEl = document.createElement('div');
+  htmlLineEl.classList.add('winning-move');
+  htmlLineEl.setAttribute('style',
+    "padding:0px; " +
+    "margin:0px; " +
+    "height:" + thickness + "px; " +
+    "background-color:" + color + "; " +
+    "line-height:1px; " +
+    "position:absolute; " +
+    "left:" + cx + "px; " +
+    "top:" + cy + "px; " +
+    "width:" + length + "px; " +
+    "-moz-transform:rotate(" + angle + "deg); " +
+    "-webkit-transform:rotate(" + angle + "deg); " +
+    "-o-transform:rotate(" + angle + "deg); " +
+    "-ms-transform:rotate(" + angle + "deg); " +
+    "transform:rotate(" + angle + "deg);'"
+  );
+  // var htmlLine = "<div class='winning-move' style='" +
+  //   "padding:0px; " +
+  //   "margin:0px; " +
+  //   "height:" + thickness + "px; " +
+  //   "background-color:" + color + "; " +
+  //   "line-height:1px; " +
+  //   "position:absolute; " +
+  //   "left:" + cx + "px; " +
+  //   "top:" + cy + "px; " +
+  //   "width:" + length + "px; " +
+  //   "-moz-transform:rotate(" + angle + "deg); " +
+  //   "-webkit-transform:rotate(" + angle + "deg); " +
+  //   "-o-transform:rotate(" + angle + "deg); " +
+  //   "-ms-transform:rotate(" + angle + "deg); " +
+  //   "transform:rotate(" + angle + "deg);'" +
+  // " />";
+  //
+  // document.body.innerHTML += htmlLine;
+  document.body.appendChild(htmlLineEl);
+}
+
+// var majorDiagonal = connect(rows[0].children[2], rows[2].children[0], 'black', 2);
+// var minorDiagonal = connect(rows[0].children[0], rows[2].children[2], 'black', 2);
+
+// var leftRow = connect(rows[0].children[0], rows[0].children[2], 'black', 2);
+// var middleRow = connect(rows[1].children[0], rows[1].children[2], 'black', 2);
+// var rightRow = connect(rows[2].children[0], rows[2].children[2], 'black', 2);
+
+// var leftCol = connect(rows[0].children[0], rows[2].children[0], 'black', 2);
+// var middleCol = connect(rows[0].children[1], rows[2].children[1], 'black', 2);
+// var rightCol = connect(rows[0].children[2], rows[2].children[2], 'black', 2);
+
+// var winStateCorners = {
+//   diagonals: {
+//     major: [rows[0].children[2], rows[2].children[0]],
+//     minor: [rows[0].children[0], rows[2].children[2]]
+//   },
+//   rows: {
+//     left: [rows[0].children[0], rows[0].children[2]],
+//     middle: [rows[1].children[0], rows[1].children[2]],
+//     right: [rows[2].children[0], rows[2].children[2]]
+//   },
+//   columns: {
+//     left: [rows[0].children[0], rows[2].children[0]],
+//     middle: [rows[0].children[1], rows[2].children[1]],
+//     right: [rows[0].children[2], rows[2].children[2]]
+//   }
+// };
+
+// var majorDiagonal = [rows[0].children[2], rows[2].children[0]]
+// var minorDiagonal = [rows[0].children[0], rows[2].children[2]]
+
+// var leftRow = [rows[0].children[0], rows[0].children[2]]
+// var middleRow = [rows[1].children[0], rows[1].children[2]]
+// var rightRow = [rows[2].children[0], rows[2].children[2]]
+
+// var leftCol = [rows[0].children[0], rows[2].children[0]]
+// var middleCol = [rows[0].children[1], rows[2].children[1]]
+// var rightCol = [rows[0].children[2], rows[2].children[2]]
+
+function drawWinningLine() {
+  Object.keys(possibleWinStates).forEach(function (key) {
+    if (possibleWinStates[key].draw) {
+      // console.log(possibleWinStates[key].cells[0], possibleWinStates[key].cells[1], 'black', 5);
+      connect(possibleWinStates[key].cells[0], possibleWinStates[key].cells[1], 'green', 5);
+    }
+  });
+}
