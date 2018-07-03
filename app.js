@@ -14,6 +14,8 @@ var board = document.querySelector('.board');
 var cells = document.querySelectorAll('.cell');
 var rows = document.querySelectorAll('.row');
 
+var detailsEl = document.querySelector('.details');
+var resetBtn = document.querySelector('button.reset');
 var winnerEl = document.querySelector('.winner');
 
 board.addEventListener('click', function(event) {
@@ -71,8 +73,21 @@ function checkForWinner(player) {
     winner = player;
     winnerEl.textContent = winner + ' Wins!';
     running = false;
+    detailsEl.classList.remove('hidden');
   } else if (allCellsFull()) {
     winnerEl.textContent = 'Draw!';
     running = false;
+    detailsEl.classList.remove('hidden');
   }
 }
+
+function resetBoard() {
+  cells.forEach(function(cell) {
+    cell.classList.remove('naught');
+    cell.classList.remove('cross');
+  });
+  detailsEl.classList.add('hidden');
+  running = true;
+}
+
+resetBtn.addEventListener('click', resetBoard);
