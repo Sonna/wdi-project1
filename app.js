@@ -105,6 +105,7 @@ function placePiece(event) {
       event.target.classList.contains('cross')) { return; }
 
   var pieceEl = document.createElement('iframe');
+  pieceEl.classList.add('chalk');
   pieceEl.classList.add(gameState.players.active);
   pieceEl.src = gameState.pieces[gameState.players.active];
   event.target.appendChild(pieceEl);

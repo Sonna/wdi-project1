@@ -12,5 +12,5 @@
       }
     }
   </style>
-  <circle class="path" cx="25" cy="25" r="20" stroke="blue" fill="transparent" stroke-width="5"/>
+  <circle class="path" cx="25" cy="25" r="20" stroke="cyan" fill="transparent" stroke-width="5"/>
 </svg>

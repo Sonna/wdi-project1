@@ -1,7 +1,8 @@
 * { box-sizing: border-box; }
 
 body {
-  background-color: lightgray;
+  background-color: black;
+  color: white;
   font-family: 'Open Sans', 'Helvetica', 'Arial', sans-serif;
 }
 
@@ -11,12 +12,22 @@ img.cross,
 img.naught {
   border: none;
   left: 25%;
+  opacity: 0.8;
   position: absolute;
   top: 25%;
 }
 
+.board {
+  background-image: url('assets/images/blackboard.jpg');
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  padding: 10px;
+  /*width: 100%;*/
+  width: 300px;
+}
+
 .board .cell:empty.cross:before {
-  color: red;
   content: 'X';
 }
 
@@ -28,12 +39,11 @@ img.naught {
 }
 
 .board .cell:empty.naught:before {
-  color: blue;
   content: 'O';
 }
 
 .cell {
-  background-color: white;
+  /*background-color: white;*/
   display: inline-block;
   height: 100px;
   position: relative;
@@ -41,7 +51,26 @@ img.naught {
 }
 
 .cell + .cell {
-  border-left: 2px solid black;
+  border-left: 5px solid rgba(255, 255, 255, 0.5);
+  border-radius: 5px;
+  -webkit-mask-image: url("assets/images/chalk.png");
+  mask-image: url("assets/images/chalk.png");
+}
+
+.chalk {
+  -webkit-mask-image: url("assets/images/chalk.png");
+  mask-image: url("assets/images/chalk.png");
+}
+
+.controls {
+  display: flex;
+  justify-content: space-around;
+}
+
+.controls button {
+  border: 1px solid black;
+  padding: 5px 0;
+  width: 80px;
 }
 
 .container {
@@ -55,32 +84,55 @@ img.naught {
   }
 }
 
+.cross {
+  color: deeppink;
+}
+
 .hidden {
   display: none;
+}
+
+.naught {
+  color: cyan;
 }
 
 .row {
   display: flex;
 }
 
-.row:first-child .cell {
-  border-bottom: 2px solid black;
+.row:first-child .cell,
+.row:nth-child(2) .cell {
+  border-bottom: 5px solid rgba(255, 255, 255, 0.5);
+  border-radius: 5px;
+  -webkit-mask-image: url("assets/images/chalk.png");
+  mask-image: url("assets/images/chalk.png");
 }
 
-.row:nth-child(2) .cell {
-  border-bottom: 2px solid black;
+.scoreboard,
+.scoreboard table {
+  margin: 0 auto;
+  text-align: center;
+}
+
+.scoreboard table {
+  margin-bottom: 20px;
+}
+
+.tie {
+  color: mediumspringgreen;
 }
 
 .wins td,
 .wins th {
   padding: 5px;
   text-align: center;
+  width: 75px;
 }
 
 .wins th {
-  border-bottom: 1px solid black;
+  border-bottom: 1px solid white;
 }
 
 .wins td + td {
-  border-left: 1px solid black;
+  border-left: 1px solid white;
 }
