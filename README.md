@@ -831,3 +831,71 @@ function removeWinningLine() {
   if (lineEl) { document.body.removeChild(lineEl); }
 }
 ```
+
+16. Add a button to Reset / Wipe Game history saved between refreshes
+
+```html
+<!-- index.html -->
+<section class="controls">
+  <button class="reset-board">Clear Board</button>
+  <button class="reset-scores">Clear Scores</button>
+  <button class="reset-all">Clear All</button>
+</section>
+```
+
+```javascript
+// app.js
+var controls = document.querySelector('.controls');
+var resetBoardBtn = controls.querySelector('.reset-board');
+var resetScoresBtn = controls.querySelector('.reset-scores');
+var resetAllBtn = controls.querySelector('.reset-all');
+
+// ...
+
+function clearBoard() {
+  cells.forEach(function(cell) {
+    cell.classList.remove('naught');
+    cell.classList.remove('cross');
+  });
+  detailsEl.classList.add('hidden');
+  removeWinningLine();
+}
+
+function resetBoard() {
+  clearBoard();
+  updateRound();
+  gameState.running = true;
+  storeGameState(gameState);
+}
+
+function resetScores() {
+  gameState.rounds = defaultGameState.rounds;
+  gameState.wins = defaultGameState.wins;
+  storeGameState(gameState);
+  updateScoreboard();
+}
+
+function resetAll() {
+  clearBoard();
+  storeGameState(defaultGameState);
+  restoreGameState();
+  updateScoreboard();
+}
+
+// ...
+
+// document ready
+(function() {
+  board.addEventListener('click', placePiece);
+
+  resetBoardBtn.addEventListener('click', resetBoard);
+  resetScoresBtn.addEventListener('click', resetScores);
+  resetAllBtn.addEventListener('click', resetAll);
+
+  initializeGameState();
+  restoreGameState();
+  updateScoreboard();
+})();
+```
+
+_Also, refactored add event listeners into document ready function_

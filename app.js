@@ -61,8 +61,12 @@ var rows = document.querySelectorAll('.row');
 
 var roundsEl = document.querySelector('.rounds');
 var detailsEl = document.querySelector('.details');
-var resetBtn = document.querySelector('button.reset');
 var winnerEl = document.querySelector('.winner');
+
+var controls = document.querySelector('.controls');
+var resetBoardBtn = controls.querySelector('.reset-board');
+var resetScoresBtn = controls.querySelector('.reset-scores');
+var resetAllBtn = controls.querySelector('.reset-all');
 
 var winsEl = document.querySelector('.wins');
 var naughtWinsEl = winsEl.querySelector('.naught');
@@ -82,7 +86,7 @@ var possibleWinStates = {
   rightColumn: { draw: false, cells: [rows[0].children[2], rows[2].children[2]] }
 };
 
-board.addEventListener('click', function(event) {
+function placePiece(event) {
   if (!gameState.running) { return; }
   if (!event.target.classList.contains('cell')) { return; }
   if (event.target.classList.contains('naught') ||
@@ -90,7 +94,7 @@ board.addEventListener('click', function(event) {
   event.target.classList.add(gameState.players.active);
   checkForWinner(gameState.players.active);
   togglePlayerTurn();
-})
+}
 
 function togglePlayerTurn() {
   if (!gameState.running) { return; }
@@ -169,19 +173,35 @@ function checkForWinner(player) {
   }
 }
 
-function resetBoard() {
+function clearBoard() {
   cells.forEach(function(cell) {
     cell.classList.remove('naught');
     cell.classList.remove('cross');
   });
   detailsEl.classList.add('hidden');
   removeWinningLine();
+}
+
+function resetBoard() {
+  clearBoard();
   updateRound();
   gameState.running = true;
   storeGameState(gameState);
 }
 
-resetBtn.addEventListener('click', resetBoard);
+function resetScores() {
+  gameState.rounds = defaultGameState.rounds;
+  gameState.wins = defaultGameState.wins;
+  storeGameState(gameState);
+  updateScoreboard();
+}
+
+function resetAll() {
+  clearBoard();
+  storeGameState(defaultGameState);
+  restoreGameState();
+  updateScoreboard();
+}
 
 function updateRound() {
   gameState.rounds++;
@@ -254,6 +274,12 @@ function removeWinningLine() {
 
 // document ready
 (function() {
+  board.addEventListener('click', placePiece);
+
+  resetBoardBtn.addEventListener('click', resetBoard);
+  resetScoresBtn.addEventListener('click', resetScores);
+  resetAllBtn.addEventListener('click', resetAll);
+
   initializeGameState();
   restoreGameState();
   updateScoreboard();
