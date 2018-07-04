@@ -558,3 +558,161 @@ function checkForWinner(player) {
   </section>
 </div>
 ```
+
+14. Look at implementing some of the bonus extensions; like
+    > * **Research** **LocalStorage** or **SessionStorage** to persist data
+    >   locally to allow games to continue after page refresh or loss of
+    >   internet connectivity
+
+> ## Example
+>
+> The following snippet accesses the current domain's local Storage object and
+> adds a data item to it using Storage.setItem().
+>
+> ```javascript
+> localStorage.setItem('myCat', 'Tom');
+> ```
+>
+> The syntax for reading the localStorage item is as follows:
+>
+> ```javascript
+> var cat = localStorage.getItem('myCat');
+> ```
+>
+> The syntax for removing the localStorage item is as follows:
+>
+> ```javascript
+> localStorage.removeItem('myCat');
+> ```
+>
+> -- [Window.localStorage - Web APIs | MDN](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage)
+
+  Effectively `localStorage` is a key-value type storage, which means as long as
+  serialize and deserialize type of methods are used, we can quickly store
+  and/or retrieve our data; e.g.
+
+```javascript
+// app.js
+var gameState = {
+  rounds: 0,
+  players: {
+    active: 'naught',
+    inactive: 'cross'
+  },
+
+  wins: {
+    naught: 0,
+    cross: 0
+  },
+
+  running: true
+};
+
+function restoreGameState() {
+  gameState = {
+    rounds: localStorage.getItem('gameState-rounds'),
+    players: {
+      active: localStorage.getItem('gameState-players-active'),
+      inactive: localStorage.getItem('gameState-players-inactive')
+    },
+
+    wins: {
+      naught: localStorage.getItem('gameState-wins-naught'),
+      cross: localStorage.getItem('gameState-wins-cross')
+    },
+
+    running: localStorage.getItem('gameState-running')
+  };
+};
+
+function storeGameState(currentState) {
+  localStorage.setItem('gameState-rounds', gameState.rounds);
+  localStorage.setItem('gameState-players-active', gameState.players.active);
+  localStorage.setItem('gameState-players-inactive', gameState.players.inactive);
+  localStorage.setItem('gameState-wins-naught', gameState.wins.naught);
+  localStorage.setItem('gameState-wins-cross', gameState.wins.cross);
+  localStorage.setItem('gameState-running', gameState.running);
+};
+
+// ...
+
+function checkForWinner(player) {
+  if (checkCols(player) || checkRows(player) || checkDiagonals(player)) {
+    updateWins(player);
+    gameState.running = false;
+    storeGameState(gameState);
+    detailsEl.classList.remove('hidden');
+    drawWinningLine();
+  } else if (allCellsFull()) {
+    winnerEl.textContent = 'Draw!';
+    gameState.running = false;
+    detailsEl.classList.remove('hidden');
+  }
+}
+
+// ...
+
+// document ready
+(function() {
+  restoreGameState();
+})();
+```
+
+_Update rest of the game to reflect new `gameState` object_
+
+However, whilst implementing `localStorage` it initializes the Game state will
+`null` if there was no prior state; i.e. the first game; thus functions to
+initialize the Game State and clearing, with a default state, were required.
+
+```javascript
+// app.js
+var gameState = {};
+var defaultGameState = {
+  rounds: 0,
+  players: {
+    active: 'naught',
+    inactive: 'cross'
+  },
+
+  wins: {
+    naught: 0,
+    cross: 0
+  },
+
+  running: true
+};
+
+function clearGameState() {
+  storeGameState(defaultGameState);
+}
+
+function initializeGameState() {
+  if (!localStorage.getItem('gameState-running')) {
+    clearGameState();
+  }
+}
+
+(function() {
+  initializeGameState();
+  restoreGameState();
+})();
+```
+
+_Updating the Scoreboard is also required in order to display the loaded Local
+Storage data on page load / ready_
+
+```javascript
+// app.js
+function updateScoreboard() {
+  roundsEl.textContent = gameState.rounds;
+  naughtWinsEl.textContent = gameState.wins.naught;
+  crossWinsEl.textContent = gameState.wins.cross;
+}
+
+// ...
+(function() {
+  initializeGameState();
+  restoreGameState();
+  updateScoreboard();
+})();
+```

@@ -1,17 +1,56 @@
 console.log('app.js loaded');
 
-var rounds = 0;
-var players = {
-  active: 'naught',
-  inactive: 'cross'
+var gameState = {};
+var defaultGameState = {
+  rounds: 0,
+  players: {
+    active: 'naught',
+    inactive: 'cross'
+  },
+
+  wins: {
+    naught: 0,
+    cross: 0
+  },
+
+  running: true
 };
 
-var wins = {
-  naught: 0,
-  cross: 0
+function clearGameState() {
+  storeGameState(defaultGameState);
+}
+
+function initializeGameState() {
+  if (!localStorage.getItem('gameState-running')) {
+    clearGameState();
+  }
+}
+
+function restoreGameState() {
+  gameState = {
+    rounds: localStorage.getItem('gameState-rounds'),
+    players: {
+      active: localStorage.getItem('gameState-players-active'),
+      inactive: localStorage.getItem('gameState-players-inactive')
+    },
+
+    wins: {
+      naught: localStorage.getItem('gameState-wins-naught'),
+      cross: localStorage.getItem('gameState-wins-cross')
+    },
+
+    running: localStorage.getItem('gameState-running')
+  };
 };
 
-var running = true;
+function storeGameState(currentState) {
+  localStorage.setItem('gameState-rounds', currentState.rounds);
+  localStorage.setItem('gameState-players-active', currentState.players.active);
+  localStorage.setItem('gameState-players-inactive', currentState.players.inactive);
+  localStorage.setItem('gameState-wins-naught', currentState.wins.naught);
+  localStorage.setItem('gameState-wins-cross', currentState.wins.cross);
+  localStorage.setItem('gameState-running', currentState.running);
+};
 
 var board = document.querySelector('.board');
 var cells = document.querySelectorAll('.cell');
@@ -40,21 +79,21 @@ var possibleWinStates = {
 };
 
 board.addEventListener('click', function(event) {
-  if (!running) { return; }
+  if (!gameState.running) { return; }
   if (!event.target.classList.contains('cell')) { return; }
   if (event.target.classList.contains('naught') ||
       event.target.classList.contains('cross')) { return; }
-  event.target.classList.add(players.active);
-  checkForWinner(players.active);
+  event.target.classList.add(gameState.players.active);
+  checkForWinner(gameState.players.active);
   togglePlayerTurn();
 })
 
 function togglePlayerTurn() {
-  if (!running) { return; }
-  var tempActive = players.active;
-  var tempInactive = players.inactive;
+  if (!gameState.running) { return; }
+  var tempActive = gameState.players.active;
+  var tempInactive = gameState.players.inactive;
 
-  players = {
+  gameState.players = {
     active: tempInactive,
     inactive: tempActive
   };
@@ -97,24 +136,30 @@ function allCellsFull() {
   });
 }
 
+function updateScoreboard() {
+  roundsEl.textContent = gameState.rounds;
+  naughtWinsEl.textContent = gameState.wins.naught;
+  crossWinsEl.textContent = gameState.wins.cross;
+}
+
 function updateWins(winner) {
   winnerEl.textContent = winner + ' Wins!';
-  wins[winner]++;
-
-  naughtWinsEl.textContent = wins.naught;
-  crossWinsEl.textContent = wins.cross;
+  gameState.wins[winner]++;
+  updateScoreboard();
 }
 
 function checkForWinner(player) {
   if (checkCols(player) || checkRows(player) || checkDiagonals(player)) {
     updateWins(player);
-    running = false;
+    gameState.running = false;
+    storeGameState(gameState);
     detailsEl.classList.remove('hidden');
     drawWinningLine();
   } else if (allCellsFull()) {
     winnerEl.textContent = 'Draw!';
-    running = false;
+    gameState.running = false;
     detailsEl.classList.remove('hidden');
+    storeGameState(gameState);
   }
 }
 
@@ -126,14 +171,15 @@ function resetBoard() {
   detailsEl.classList.add('hidden');
   document.body.removeChild(document.querySelector('.winning-move'));
   updateRound();
-  running = true;
+  gameState.running = true;
+  storeGameState(gameState);
 }
 
 resetBtn.addEventListener('click', resetBoard);
 
 function updateRound() {
-  rounds++;
-  roundsEl.textContent = rounds;
+  gameState.rounds++;
+  updateScoreboard();
 }
 
 function getOffset( el ) {
@@ -194,3 +240,10 @@ function drawWinningLine() {
     }
   });
 }
+
+// document ready
+(function() {
+  initializeGameState();
+  restoreGameState();
+  updateScoreboard();
+})();
