@@ -899,3 +899,85 @@ function resetAll() {
 ```
 
 _Also, refactored add event listeners into document ready function_
+
+17. But what if I replaced the text content style for naughts and crosses, with
+    either an actual image, or some more animated like a Scalar Vector Graphic
+    (`svg`).
+
+    So this part was looking more at a way of animating the drawing of naughts
+    and crosses, which would require either some weird `div` elements; like the
+    one currently used to draw the winning line across the board cells, or
+    generating new ones to build a cross using two lines, two linear gradients
+    with transparent colours and for a circle an empty `div` with a square
+    height & width, but a overly round border; the only problem is they would
+    not easily animate as a if they were being drawn; more like fading or moving
+    into existence using CSS animations.
+
+    However, came across the following CSS-Tricks blog post:
+
+    - [How SVG Line Animation Works | CSS-Tricks](https://css-tricks.com/svg-line-animation-works/)
+
+    That details drawing an SVG using a dashed line to draw in polyline shapes,
+    going from a zero dash-offset to a large enough dash-offset for a single
+    dash to encompass an entire shape, then tweening between the two states;
+    giving it the effect of something drawing the elements onto the page.
+
+    Looking at the
+    [Mozilla Developer Network documentation on `svg`](https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Basic_Shapes)
+    I found the shapes we need; a circle and a line.
+
+```svg
+<!-- Circle / Naught -->
+<svg width="50" height="50" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <circle class="path" cx="25" cy="25" r="20" stroke="blue" fill="transparent" stroke-width="5"/>
+</svg>
+
+<!-- Cross / 'X' -->
+<svg width="50" height="50" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <line class="first-stroke" x1="0" x2="50" y1="0" y2="50" stroke="red" stroke-width="5"/>
+  <line class="second-stroke" x1="50" x2="0" y1="0" y2="50" stroke="red" stroke-width="5"/>
+</svg>
+```
+
+Then with some slight animation CSS, it can be animated as if being drawn when
+rendered within the page.
+
+```css
+/*
+- assets/svg/cross.svg
+- assets/svg/naught.svg
+*/
+.path,
+.first-stroke,
+.second-stroke {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: dash 5s linear forwards;
+}
+
+.second-stroke {
+  animation-delay: 0.5s;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+```
+
+With these new assets they can be added to the page as either `img` or `iframe`;
+like so:
+
+```html
+<img src="assets/svg/cross.svg">
+<img src="assets/svg/naught.svg">
+
+<!-- or -->
+
+<iframe src="assets/svg/cross.svg"></iframe>
+<iframe src="assets/svg/naught.svg"></iframe>
+```
+
+However, using `img` means it would be easier to replace its `src` attribute
+with something else if another bonus extension criteria is to fulfilled.

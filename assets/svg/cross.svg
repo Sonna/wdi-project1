@@ -1,0 +1,22 @@
+<svg width="50" height="50" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .first-stroke,
+    .second-stroke {
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 1000;
+      animation: dash 5s linear forwards;
+    }
+
+    .second-stroke {
+      animation-delay: 0.5s;
+    }
+
+    @keyframes dash {
+      to {
+        stroke-dashoffset: 0;
+      }
+    }
+  </style>
+  <line class="first-stroke" x1="0" x2="50" y1="0" y2="50" stroke="red" stroke-width="5"/>
+  <line class="second-stroke" x1="50" x2="0" y1="0" y2="50" stroke="red" stroke-width="5"/>
+</svg>

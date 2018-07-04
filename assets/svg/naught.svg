@@ -1,0 +1,16 @@
+<svg width="50" height="50" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .path {
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 1000;
+      animation: dash 5s linear forwards;
+    }
+
+    @keyframes dash {
+      to {
+        stroke-dashoffset: 0;
+      }
+    }
+  </style>
+  <circle class="path" cx="25" cy="25" r="20" stroke="blue" fill="transparent" stroke-width="5"/>
+</svg>
