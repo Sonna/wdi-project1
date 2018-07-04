@@ -716,3 +716,118 @@ function updateScoreboard() {
   updateScoreboard();
 })();
 ```
+
+15. Whilst implementing `localStorage` two bugs occur:
+    * Unhandled removal of winning line NOT drawn on Tie, and
+    * Not keeping track of Tie games, internally or on the scoreboard
+
+```html
+<!-- index.html -->
+<table class="wins">
+  <thead>
+    <caption>Wins</caption>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Naughts</th>
+      <th>Crosses</th>
+      <th>Ties</th>
+    </tr>
+    <tr>
+      <td class="naught">0</td>
+      <td class="cross">0</td>
+      <td class="tie">0</td>
+    </tr>
+  </tbody>
+</table>
+```
+
+```javascript
+// app.js
+var defaultGameState = {
+  rounds: 0,
+  players: {
+    active: 'naught',
+    inactive: 'cross'
+  },
+
+  wins: {
+    naught: 0,
+    cross: 0,
+    tie: 0
+  },
+
+  running: true
+};
+
+// ...
+
+var winsEl = document.querySelector('.wins');
+// ...
+var tieWinsEl = winsEl.querySelector('.tie');
+
+// ...
+
+function restoreGameState() {
+  gameState = {
+    // ...
+    wins: {
+      // ...
+      tie: localStorage.getItem('gameState-wins-tie')
+    },
+    // ...
+  };
+};
+
+function storeGameState(currentState) {
+  // ...
+  localStorage.setItem('gameState-wins-tie', currentState.wins.tie);
+  // ...
+};
+
+// ...
+
+function updateScoreboard() {
+  roundsEl.textContent = gameState.rounds;
+  naughtWinsEl.textContent = gameState.wins.naught;
+  crossWinsEl.textContent = gameState.wins.cross;
+  tieWinsEl.textContent = gameState.wins.tie;
+}
+
+// ...
+
+function checkForWinner(player) {
+  if (checkCols(player) || checkRows(player) || checkDiagonals(player)) {
+    updateWins(player);
+    gameState.running = false;
+    storeGameState(gameState);
+    detailsEl.classList.remove('hidden');
+    drawWinningLine();
+  } else if (allCellsFull()) {
+    updateWins('tie'); // <-- This Line!!!
+    winnerEl.textContent = 'Draw!';
+    gameState.running = false;
+    detailsEl.classList.remove('hidden');
+    storeGameState(gameState);
+  }
+}
+
+function resetBoard() {
+  cells.forEach(function(cell) {
+    cell.classList.remove('naught');
+    cell.classList.remove('cross');
+  });
+  detailsEl.classList.add('hidden');
+  removeWinningLine(); // <-- This Line!!!
+  updateRound();
+  gameState.running = true;
+  storeGameState(gameState);
+}
+
+// ...
+
+function removeWinningLine() {
+  var lineEl = document.querySelector('.winning-move');
+  if (lineEl) { document.body.removeChild(lineEl); }
+}
+```

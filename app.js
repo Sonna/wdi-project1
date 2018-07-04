@@ -10,7 +10,8 @@ var defaultGameState = {
 
   wins: {
     naught: 0,
-    cross: 0
+    cross: 0,
+    tie: 0
   },
 
   running: true
@@ -36,7 +37,8 @@ function restoreGameState() {
 
     wins: {
       naught: localStorage.getItem('gameState-wins-naught'),
-      cross: localStorage.getItem('gameState-wins-cross')
+      cross: localStorage.getItem('gameState-wins-cross'),
+      tie: localStorage.getItem('gameState-wins-tie')
     },
 
     running: localStorage.getItem('gameState-running')
@@ -49,6 +51,7 @@ function storeGameState(currentState) {
   localStorage.setItem('gameState-players-inactive', currentState.players.inactive);
   localStorage.setItem('gameState-wins-naught', currentState.wins.naught);
   localStorage.setItem('gameState-wins-cross', currentState.wins.cross);
+  localStorage.setItem('gameState-wins-tie', currentState.wins.tie);
   localStorage.setItem('gameState-running', currentState.running);
 };
 
@@ -64,6 +67,7 @@ var winnerEl = document.querySelector('.winner');
 var winsEl = document.querySelector('.wins');
 var naughtWinsEl = winsEl.querySelector('.naught');
 var crossWinsEl = winsEl.querySelector('.cross');
+var tieWinsEl = winsEl.querySelector('.tie');
 
 var possibleWinStates = {
   majorDiagonal: { draw: false, cells: [rows[0].children[0], rows[2].children[2]] },
@@ -140,6 +144,7 @@ function updateScoreboard() {
   roundsEl.textContent = gameState.rounds;
   naughtWinsEl.textContent = gameState.wins.naught;
   crossWinsEl.textContent = gameState.wins.cross;
+  tieWinsEl.textContent = gameState.wins.tie;
 }
 
 function updateWins(winner) {
@@ -156,6 +161,7 @@ function checkForWinner(player) {
     detailsEl.classList.remove('hidden');
     drawWinningLine();
   } else if (allCellsFull()) {
+    updateWins('tie');
     winnerEl.textContent = 'Draw!';
     gameState.running = false;
     detailsEl.classList.remove('hidden');
@@ -169,7 +175,7 @@ function resetBoard() {
     cell.classList.remove('cross');
   });
   detailsEl.classList.add('hidden');
-  document.body.removeChild(document.querySelector('.winning-move'));
+  removeWinningLine();
   updateRound();
   gameState.running = true;
   storeGameState(gameState);
@@ -239,6 +245,11 @@ function drawWinningLine() {
       connect(possibleWinStates[key].cells[0], possibleWinStates[key].cells[1], 'green', 5);
     }
   });
+}
+
+function removeWinningLine() {
+  var lineEl = document.querySelector('.winning-move');
+  if (lineEl) { document.body.removeChild(lineEl); }
 }
 
 // document ready
