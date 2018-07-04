@@ -98,6 +98,14 @@ var possibleWinStates = {
   rightColumn: { draw: false, cells: [rows[0].children[2], rows[2].children[2]] }
 };
 
+var chalkSfx = {
+  erase: new Audio("assets/sfx/chalk-erase.mp3"),
+  cross: new Audio("assets/sfx/chalk-cross.mp3"),
+  line: new Audio("assets/sfx/chalk-line.mp3"),
+  naught: new Audio("assets/sfx/chalk-naught.mp3"),
+  tie: new Audio("assets/sfx/chalk-tie.mp3")
+};
+
 function placePiece(event) {
   if (!gameState.running) { return; }
   if (!event.target.classList.contains('cell')) { return; }
@@ -111,6 +119,7 @@ function placePiece(event) {
   event.target.appendChild(pieceEl);
 
   event.target.classList.add(gameState.players.active);
+  chalkSfx[gameState.players.active].play();
   checkForWinner(gameState.players.active);
   togglePlayerTurn();
 }
@@ -185,6 +194,7 @@ function checkForWinner(player) {
     drawWinningLine();
   } else if (allCellsFull()) {
     updateWins('tie');
+    chalkSfx.tie.play();
     winnerEl.textContent = 'Draw!';
     gameState.running = false;
     detailsEl.classList.remove('hidden');
@@ -193,14 +203,21 @@ function checkForWinner(player) {
 }
 
 function clearBoard() {
+  chalkSfx.erase.play();
   cells.forEach(function(cell) {
-    cell.classList.remove('naught');
-    cell.classList.remove('cross');
-    cell.innerHTML = ''; // Delete Children `img` elements
+    var piece = cell.children[0];
+    if (piece) { piece.classList.add('fade-out'); }
   });
   detailsEl.classList.add('hidden');
   removeWinningLine();
-  gameState.running = true;
+  setTimeout(function() {
+    cells.forEach(function(cell) {
+      cell.classList.remove('naught');
+      cell.classList.remove('cross');
+      cell.innerHTML = ''; // Delete Children `img` elements
+    });
+    gameState.running = true;
+  }, 1000);
 }
 
 function resetBoard() {
@@ -286,6 +303,7 @@ function drawWinningLine() {
       connect(possibleWinStates[key].cells[0], possibleWinStates[key].cells[1], 'green', 5);
     }
   });
+  chalkSfx.line.play();
 }
 
 function removeWinningLine() {

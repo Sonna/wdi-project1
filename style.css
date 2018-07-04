@@ -15,6 +15,15 @@ img.naught {
   opacity: 0.8;
   position: absolute;
   top: 25%;
+  transition: opacity 1s ease-in-out;
+}
+
+iframe.cross.fade-out,
+iframe.naught.fade-out,
+img.cross.fade-out,
+img.naught.fade-out {
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
 }
 
 .board {
