@@ -31,9 +31,12 @@ img.naught.fade-out {
   background-position: center center;
   background-repeat: no-repeat;
   background-size: cover;
+  border-bottom: 5px solid #A50;
+  border-top: 1px solid orange;
+  margin: 0 auto;
   padding: 10px;
-  /*width: 100%;*/
-  width: 300px;
+  width: 100%;
+  /*width: 300px;*/
 }
 
 .board .cell:empty.cross:before {
@@ -107,6 +110,7 @@ img.naught.fade-out {
 
 .row {
   display: flex;
+  justify-content: center;
 }
 
 .row:first-child .cell,

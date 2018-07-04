@@ -260,14 +260,15 @@ function getOffset( el ) {
 // - [javascript - How to draw a line between two divs? - Stack Overflow]
 //   (https://stackoverflow.com/questions/8672369/how-to-draw-a-line-between-two-divs)
 function connect(div1, div2, color, thickness) { // draw a line connecting elements
+  var padding = 3;
   var off1 = getOffset(div1);
   var off2 = getOffset(div2);
   // find center of div1 (was bottom right)
-  var x1 = off1.left + off1.width/2;
-  var y1 = off1.top + off1.height/2;
+  var x1 = off1.left + off1.width/2 + padding;
+  var y1 = off1.top + off1.height/2 + padding;
   // find center of div1 (was top right)
-  var x2 = off2.left + off2.width/2;
-  var y2 = off2.top + off2.height/2;
+  var x2 = off2.left + off2.width/2 + padding;
+  var y2 = off2.top + off2.height/2 + padding;
   // distance
   var length = Math.sqrt(((x2-x1) * (x2-x1)) + ((y2-y1) * (y2-y1)));
   // center
