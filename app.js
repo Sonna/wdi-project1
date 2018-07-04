@@ -8,6 +8,11 @@ var defaultGameState = {
     inactive: 'cross'
   },
 
+  pieces: {
+    cross: 'assets/svg/cross.svg',
+    naught: 'assets/svg/naught.svg'
+  },
+
   wins: {
     naught: 0,
     cross: 0,
@@ -35,6 +40,11 @@ function restoreGameState() {
       inactive: localStorage.getItem('gameState-players-inactive')
     },
 
+    pieces: {
+      cross: localStorage.getItem('gameState-pieces-cross'),
+      naught: localStorage.getItem('gameState-pieces-naught')
+    },
+
     wins: {
       naught: localStorage.getItem('gameState-wins-naught'),
       cross: localStorage.getItem('gameState-wins-cross'),
@@ -49,6 +59,8 @@ function storeGameState(currentState) {
   localStorage.setItem('gameState-rounds', currentState.rounds);
   localStorage.setItem('gameState-players-active', currentState.players.active);
   localStorage.setItem('gameState-players-inactive', currentState.players.inactive);
+  localStorage.setItem('gameState-pieces-cross', currentState.pieces.cross);
+  localStorage.setItem('gameState-pieces-naught', currentState.pieces.naught);
   localStorage.setItem('gameState-wins-naught', currentState.wins.naught);
   localStorage.setItem('gameState-wins-cross', currentState.wins.cross);
   localStorage.setItem('gameState-wins-tie', currentState.wins.tie);
@@ -91,6 +103,12 @@ function placePiece(event) {
   if (!event.target.classList.contains('cell')) { return; }
   if (event.target.classList.contains('naught') ||
       event.target.classList.contains('cross')) { return; }
+
+  var pieceEl = document.createElement('iframe');
+  pieceEl.classList.add(gameState.players.active);
+  pieceEl.src = gameState.pieces[gameState.players.active];
+  event.target.appendChild(pieceEl);
+
   event.target.classList.add(gameState.players.active);
   checkForWinner(gameState.players.active);
   togglePlayerTurn();
@@ -177,9 +195,11 @@ function clearBoard() {
   cells.forEach(function(cell) {
     cell.classList.remove('naught');
     cell.classList.remove('cross');
+    cell.innerHTML = ''; // Delete Children `img` elements
   });
   detailsEl.classList.add('hidden');
   removeWinningLine();
+  gameState.running = true;
 }
 
 function resetBoard() {

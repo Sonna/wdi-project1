@@ -5,20 +5,38 @@ body {
   font-family: 'Open Sans', 'Helvetica', 'Arial', sans-serif;
 }
 
-.board .naught:before {
-  color: blue;
-  content: 'O';
+iframe.cross,
+iframe.naught,
+img.cross,
+img.naught {
+  border: none;
+  left: 25%;
+  position: absolute;
+  top: 25%;
 }
 
-.board .cross:before {
+.board .cell:empty.cross:before {
   color: red;
   content: 'X';
+}
+
+.board .cell:empty.cross:before,
+.board .cell:empty.naught:before {
+  display: block;
+  font-size: 72px;
+  text-align: center;
+}
+
+.board .cell:empty.naught:before {
+  color: blue;
+  content: 'O';
 }
 
 .cell {
   background-color: white;
   display: inline-block;
   height: 100px;
+  position: relative;
   width: 100px;
 }
 
@@ -35,13 +53,6 @@ body {
     display: flex;
     justify-content: space-around;
   }
-}
-
-.cross:before,
-.naught:before {
-  display: block;
-  font-size: 72px;
-  text-align: center;
 }
 
 .hidden {

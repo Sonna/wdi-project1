@@ -981,3 +981,16 @@ like so:
 
 However, using `img` means it would be easier to replace its `src` attribute
 with something else if another bonus extension criteria is to fulfilled.
+
+_Unfortunately, `iframe` will be used :(, since `img` is cached and subsequent
+images get loaded instantly off the same source, meaning no animation, whereas
+the `iframe` forces the reload and thus play the animation each time its added
+to the page._
+
+_Otherwise, the `svg` would need to be construct in JavaScript ahead of time
+in order to remove and add animation styles or relate classes to force replaying
+the animation._
+
+18. Update JavaScript & CSS to add `iframe` to the page
+
+<!-- todo -->
