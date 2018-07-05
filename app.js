@@ -2,6 +2,7 @@ console.log('app.js loaded');
 
 var gameState = {};
 var defaultGameState = {
+  version: '2018-07-05_0858',
   rounds: 0,
   players: {
     active: 'naught',
@@ -27,7 +28,7 @@ function clearGameState() {
 }
 
 function initializeGameState() {
-  if (!localStorage.getItem('gameState-running')) {
+  if (localStorage.getItem('gameState-version') !== defaultGameState.version) {
     clearGameState();
   }
 }

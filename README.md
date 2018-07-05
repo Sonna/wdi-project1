@@ -993,4 +993,215 @@ the animation._
 
 18. Update JavaScript & CSS to add `iframe` to the page
 
-<!-- todo -->
+So, the reasoning behind using an `iframe` instead of an `img` is in order to
+force a load of the image each time its added to the page, rather than loaded
+once and then the browser refers to the cached image that has finished playing
+its animation. This decision is solely to keep the animation each time its added
+to the board, rather than rebuilding a new `svg` element through JavaScript to
+achieve the same effect.
+
+Update the JavaScript to us an `iframe` instead of `img`
+
+```javascript
+function placePiece(event) {
+  // ...
+  var pieceEl = document.createElement('iframe');
+  // ...
+}
+```
+
+Update styles to remove `iframe` borders and padding
+
+```css
+/* style.css */
+iframe.cross,
+iframe.naught,
+img.cross,
+img.naught {
+  border: none;
+}
+```
+
+19. Update the styles to be more chalk-like
+
+Until now the styles have been quite bare bone and dry, which was deliberately
+so, however the application needs a new coat of paint to better match the game.
+In order to do this, the game will be styled as if being drawn using Chalk on a
+blackboard.
+
+To start with, saving an image asset to be our blackboard
+`assets/images/blackboard.jpg` and update the styles to reflect that within the
+application.
+
+```css
+/* style.css */
+.board {
+  background-image: url('assets/images/blackboard.jpg');
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  border-bottom: 5px solid #A50;
+  border-top: 1px solid orange;
+  margin: 0 auto;
+  padding: 10px;
+  width: 100%;
+}
+```
+
+This however made the existing colours for the naughts and crosses too dark
+against it, so their colours were updated in the CSS stylesheet and their SVG
+assets to be brighter pascal colours `deeppink` and `cyan` respectively.
+
+Then update the rest of the background to be darker to emphasis the blackboard,
+also meaning text colours need to be inverted to stand out from the black
+background.
+
+```css
+/* style.css */
+body {
+  background-color: black;
+  color: white;
+  font-family: 'Open Sans', 'Helvetica', 'Arial', sans-serif;
+}
+```
+
+Whilst also applying chalk textures as a mask overlay on most elements on the
+board, whilst reduce their opacity.
+
+```css
+/* style.css */
+
+iframe.cross,
+iframe.naught,
+img.cross,
+img.naught {
+  border: none;
+  left: 25%;
+  opacity: 0.8;
+  position: absolute;
+  top: 25%;
+}
+
+.cell + .cell {
+  border-left: 5px solid rgba(255, 255, 255, 0.5);
+  border-radius: 5px;
+  -webkit-mask-image: url("assets/images/chalk.png");
+  mask-image: url("assets/images/chalk.png");
+}
+
+.chalk {
+  -webkit-mask-image: url("assets/images/chalk.png");
+  mask-image: url("assets/images/chalk.png");
+}
+
+.row:first-child .cell,
+.row:nth-child(2) .cell {
+  border-bottom: 5px solid rgba(255, 255, 255, 0.5);
+  border-radius: 5px;
+  -webkit-mask-image: url("assets/images/chalk.png");
+  mask-image: url("assets/images/chalk.png");
+}
+
+```
+
+20. Add sound effects to the game on different actions
+
+Review the MDN documentation at the following link:
+
+- [Audio for Web games - Game development | MDN](https://developer.mozilla.org/en-US/docs/Games/Techniques/Audio_for_Web_Games#Mobile_workarounds)
+- [Sound effects in JavaScript / HTML5 - Stack Overflow](https://stackoverflow.com/questions/1933969/sound-effects-in-javascript-html5)
+
+Which essentially boiled down the API as follows:
+
+```javascript
+var myAudio = document.createElement("audio");
+myAudio.src = "mysprite.mp3";
+
+// Or
+
+var myAudio = new Audio("mysprite.mp3");
+
+myAudio.play();
+myAudio.pause();
+```
+
+This means that as long the audio exists then it can be referenced via the
+JavaScript `Audio` object and call play when the sound effect needs to occur,
+like as follows:
+
+```javascript
+var chalkSfx = {
+  erase: new Audio("assets/sfx/chalk-erase.mp3"),
+  cross: new Audio("assets/sfx/chalk-cross.mp3"),
+  line: new Audio("assets/sfx/chalk-line.mp3"),
+  naught: new Audio("assets/sfx/chalk-naught.mp3"),
+  tie: new Audio("assets/sfx/chalk-tie.mp3")
+};
+
+// ...
+
+function placePiece(event) {
+  // ...
+  chalkSfx[gameState.players.active].play();
+  // ...
+}
+
+// ...
+
+function checkForWinner(player) {
+  if (checkCols(player) || checkRows(player) || checkDiagonals(player)) {
+    // ...
+    chalkSfx.line.play();
+  } else if (allCellsFull()) {
+    // ...
+    chalkSfx.tie.play();
+    // ...
+  }
+}
+
+// ...
+function clearBoard() {
+  chalkSfx.erase.play();
+  // ...
+}
+
+```
+
+21. Fix a version bug between updates to loading local storage data
+
+```javascript
+function initializeGameState() {
+  if (!localStorage.getItem('gameState-running')) {
+    clearGameState();
+  }
+}
+```
+
+So previously the code was just checking the first `gameState` value within
+local storage to determine if there was previous data, but this was flawed for a
+few reasons. One it was only checking a single value, instead of all of them,
+and two it was often returning a false-positive causing new data to not be
+loaded when returning to the page.
+
+To solve this issue giving a version number means that older data can be
+expunged and updated. Obviously this destroys data between versions, and could
+be handled more gracefully (say `up` & `down` migrations), but this task it
+seems fine to reset the game.
+
+```javascript
+var defaultGameState = {
+  version: '2018-07-05_0858',
+  // ...
+};
+
+function initializeGameState() {
+  if (localStorage.getItem('gameState-version') !== defaultGameState.version) {
+    clearGameState();
+  }
+}
+```
+
+_This does now mean any additions to the `gameState` needs the version number
+updated to reflect those changes._
+
+22. Replace the `div` HTML element that draws the line to be an `svg` instead
