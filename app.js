@@ -98,16 +98,16 @@ var crossWinsEl = winsEl.querySelector('.cross');
 var tieWinsEl = winsEl.querySelector('.tie');
 
 var possibleWinStates = {
-  majorDiagonal: { draw: false, cells: [rows[0].children[0], rows[2].children[2]] },
-  minorDiagonal: { draw: false, cells: [rows[0].children[2], rows[2].children[0]] },
+  majorDiagonal: { draw: false, cells: [cells[0], cells[8]] },
+  minorDiagonal: { draw: false, cells: [cells[6], cells[2]] },
 
-  topRow: { draw: false, cells: [rows[0].children[0], rows[0].children[2]] },
-  middleRow: { draw: false, cells: [rows[1].children[0], rows[1].children[2]] },
-  bottomRow: { draw: false, cells: [rows[2].children[0], rows[2].children[2]] },
+  topRow: { draw: false, cells: [cells[0], cells[2]] },
+  middleRow: { draw: false, cells: [cells[3], cells[5]] },
+  bottomRow: { draw: false, cells: [cells[6], cells[8]] },
 
-  leftColumn: { draw: false, cells: [rows[0].children[0], rows[2].children[0]] },
-  middleColumn: { draw: false, cells: [rows[0].children[1], rows[2].children[1]] },
-  rightColumn: { draw: false, cells: [rows[0].children[2], rows[2].children[2]] }
+  leftColumn: { draw: false, cells: [cells[0], cells[6]] },
+  middleColumn: { draw: false, cells: [cells[1], cells[7]] },
+  rightColumn: { draw: false, cells: [cells[2], cells[8]] }
 };
 
 var chalkSfx = {
