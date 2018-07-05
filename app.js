@@ -222,7 +222,7 @@ function updateWins(winner) {
   detailsEl.classList.remove('hidden');
 }
 
-function onWin() {
+function onWin(player) {
   updateWins(player);
   drawWinningLine();
 }
@@ -234,7 +234,7 @@ function onTie() {
 
 function checkForWinner(player) {
   if (checkCols(player) || checkRows(player) || checkDiagonals(player)) {
-    onWin();
+    onWin(player);
   } else if (allCellsFull()) {
     onTie();
   }
