@@ -1434,7 +1434,6 @@ function buildWinningLine(thickness, color, x1, x2, y1, y2, hasStyle) {
 
 // ...
 
-
 function drawWinningLine() {
   // ...
   connect(possibleWinStates[key].cells[0], possibleWinStates[key].cells[1], 'green', 5, true)
@@ -1449,3 +1448,32 @@ function resizeWinningLine(event) {
   // ...
 }
 ```
+
+_Fix winning line covering entire screen, in effect disabling buttons :(._
+
+```javascript
+// ...
+
+function buildWinningLine(thickness, color, x1, x2, y1, y2, hasStyle) {
+  var boardDimensions = board.getBoundingClientRect();
+
+  // ...
+
+  var htmlLineEl = document.createElement('div');
+  htmlLineEl.innerHTML =
+  '<svg class="winning-move"' +
+        ' width="' + boardDimensions.width + '"' +
+        ' height="' + boardDimensions.height + '"' +
+        ' xmlns="http://www.w3.org/2000/svg" version="1.1"' +
+        ' style="' +
+          'position: absolute;' +
+          'top: 0;' +
+          'left: 0;' +
+        '">';
+// ...
+}
+```
+
+23. Fix persist state of the board
+
+24. Allow User to Customize pieces

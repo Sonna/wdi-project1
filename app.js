@@ -274,6 +274,7 @@ function connect(div1, div2, color, thickness, hasStyle) { // draw a line connec
 }
 
 function buildWinningLine(thickness, color, x1, x2, y1, y2, hasStyle) {
+  var boardDimensions = board.getBoundingClientRect();
   var style = '';
 
   if (hasStyle) {
@@ -295,7 +296,8 @@ function buildWinningLine(thickness, color, x1, x2, y1, y2, hasStyle) {
   var htmlLineEl = document.createElement('div');
   htmlLineEl.innerHTML =
   '<svg class="winning-move"' +
-        ' width="100%" height="100%"' +
+        ' width="' + boardDimensions.width + '"' +
+        ' height="' + boardDimensions.height + '"' +
         ' xmlns="http://www.w3.org/2000/svg" version="1.1"' +
         ' style="' +
           'position: absolute;' +
@@ -319,8 +321,8 @@ function buildWinningLine(thickness, color, x1, x2, y1, y2, hasStyle) {
 function drawWinningLine() {
   Object.keys(possibleWinStates).forEach(function (key) {
     if (possibleWinStates[key].draw) {
-      document.body.appendChild(
-        connect(possibleWinStates[key].cells[0], possibleWinStates[key].cells[1], 'green', 5, true)
+      board.appendChild(
+        connect(possibleWinStates[key].cells[0], possibleWinStates[key].cells[1], 'mediumspringgreen', 5, true)
       );
     }
   });
@@ -329,7 +331,7 @@ function drawWinningLine() {
 
 function removeWinningLine() {
   var lineEl = document.querySelector('.winning-move');
-  if (lineEl) { document.body.removeChild(lineEl); }
+  if (lineEl) { board.removeChild(lineEl); }
 }
 
 function resizeWinningLine(event) {
@@ -338,7 +340,7 @@ function resizeWinningLine(event) {
     Object.keys(possibleWinStates).forEach(function (key) {
       if (possibleWinStates[key].draw) {
         lineEl.parentNode.replaceChild(
-          connect(possibleWinStates[key].cells[0], possibleWinStates[key].cells[1], 'green', 5, false),
+          connect(possibleWinStates[key].cells[0], possibleWinStates[key].cells[1], 'mediumspringgreen', 5, false),
           lineEl
         );
       }
