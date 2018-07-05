@@ -1167,6 +1167,30 @@ function clearBoard() {
 
 ```
 
+_Also, forgot to mentioned the `clearBoard` when execute fades out elements
+before removing, whilst playing the sound effect._
+
+```javascript
+function clearBoard() {
+  chalkSfx.erase.play();
+  cells.forEach(function(cell) {
+    var piece = cell.children[0];
+    if (piece) { piece.classList.add('fade-out'); }
+  });
+  detailsEl.classList.add('hidden');
+  removeWinningLine();
+  setTimeout(function() {
+    cells.forEach(function(cell) {
+      cell.classList.remove('naught');
+      cell.classList.remove('cross');
+      cell.innerHTML = ''; // Delete Children `img` elements
+    });
+    gameState.running = true;
+  }, 1000);
+}
+
+```
+
 21. Fix a version bug between updates to loading local storage data
 
 ```javascript
@@ -1205,3 +1229,223 @@ _This does now mean any additions to the `gameState` needs the version number
 updated to reflect those changes._
 
 22. Replace the `div` HTML element that draws the line to be an `svg` instead
+
+First refactor the building of the line into a separate function, using the
+previous attributes as arguments to build a new line.
+
+```javascript
+function connect(div1, div2, color, thickness) { // draw a line connecting elements
+  var padding = 3;
+  var off1 = getOffset(div1);
+  var off2 = getOffset(div2);
+  // find center of div1 (was bottom right)
+  var x1 = off1.left + off1.width/2 + padding;
+  var y1 = off1.top + off1.height/2 + padding;
+  // find center of div1 (was top right)
+  var x2 = off2.left + off2.width/2 + padding;
+  var y2 = off2.top + off2.height/2 + padding;
+  // distance
+  var length = Math.sqrt(((x2-x1) * (x2-x1)) + ((y2-y1) * (y2-y1)));
+  // center
+  var cx = ((x1 + x2) / 2) - (length / 2);
+  var cy = ((y1 + y2) / 2) - (thickness / 2);
+  // angle
+  var angle = Math.atan2((y1-y2),(x1-x2))*(180/Math.PI);
+  // make hr
+  document.body.appendChild(
+    buildWinningLine(thickness, color, cx, cy, length, angle)
+  );
+}
+
+function buildWinningLine(thickness, color, cx, cy, length, angle) {
+  var htmlLineEl = document.createElement('div');
+  htmlLineEl.classList.add('winning-move');
+  htmlLineEl.setAttribute('style',
+    "padding:0px; " +
+    "margin:0px; " +
+    "height:" + thickness + "px; " +
+    "background-color:" + color + "; " +
+    "line-height:1px; " +
+    "position:absolute; " +
+    "left:" + cx + "px; " +
+    "top:" + cy + "px; " +
+    "width:" + length + "px; " +
+    "-moz-transform:rotate(" + angle + "deg); " +
+    "-webkit-transform:rotate(" + angle + "deg); " +
+    "-o-transform:rotate(" + angle + "deg); " +
+    "-ms-transform:rotate(" + angle + "deg); " +
+    "transform:rotate(" + angle + "deg);'"
+  );
+  return htmlLineEl;
+}
+
+```
+
+Then work at converting the `div` element into an `svg` element that have the
+same drawing animation applied to it.
+
+```javascript
+function connect(div1, div2, color, thickness) { // draw a line connecting elements
+  var off1 = getOffset(div1);
+  var off2 = getOffset(div2);
+  // find center of div1 (was bottom right)
+  var x1 = off1.left + off1.width/2;
+  var y1 = off1.top + off1.height/2;
+  // find center of div1 (was top right)
+  var x2 = off2.left + off2.width/2;
+  var y2 = off2.top + off2.height/2;
+
+  document.body.appendChild(
+    buildWinningLine(thickness, color, x1, x2, y1, y2)
+  );
+}
+
+function buildWinningLine(thickness, color, x1, x2, y1, y2) {
+  var htmlLineEl = document.createElement('div');
+  htmlLineEl.innerHTML =
+  '<svg class="winning-move"' +
+        ' width="100%" height="100%"' +
+        ' xmlns="http://www.w3.org/2000/svg" version="1.1"' +
+        ' style="' +
+          'position: absolute;' +
+          'top: 0;' +
+          'left: 0;' +
+        '">' +
+    '<style>' +
+      '.path {' +
+      '  stroke-dasharray: 1000;' +
+      '  stroke-dashoffset: 1000;' +
+      '  animation: dash 5s linear forwards;' +
+      '}' +
+
+      '@keyframes dash {' +
+      '  to {' +
+      '    stroke-dashoffset: 0;' +
+      '  }' +
+      '}' +
+    '</style>' +
+    '<line class="path" ' +
+      'x1="' + x1 + '"' +
+      'x2="' + x2 + '"' +
+      'y1="' + y1 + '"' +
+      'y2="' + y2 + '"' +
+      'stroke="' + color + '"' +
+      'stroke-width="' + thickness + '" ' +
+      'stroke-linecap="round"' +
+    ' />' +
+  '</svg>';
+  return htmlLineEl.firstChild;
+}
+```
+
+_Unfortunately styles from external stylesheet do not work, unless the element
+is inline HTML, rather the created after the fact :(._
+
+There is however one remaining bug this change introduces, which is the line
+does move with the board and needs to recalculate its position when the browser
+window is resized.
+
+Sooo, on `resize` window event, redraw the line
+
+```javascript
+function resizeWinningLine(event) {
+  var lineEl = document.querySelector('.winning-move');
+  if (lineEl) {
+    Object.keys(possibleWinStates).forEach(function (key) {
+      if (possibleWinStates[key].draw) {
+        lineEl.parentNode.replaceChild(
+          connect(possibleWinStates[key].cells[0], possibleWinStates[key].cells[1], 'green', 5),
+          lineEl
+        );
+      }
+    });
+  }
+}
+
+// document ready
+(function() {
+  window.addEventListener('resize', resizeWinningLine);
+  // ...
+})();
+```
+
+But then it redraws the line on every resize, because of the animation style.
+
+Add an optional toggle for style when build the line `hasStyle`.
+
+```javascript
+//                                                | new option `hasStyle`
+// app.js                                         v
+function connect(div1, div2, color, thickness, hasStyle) {
+  var off1 = getOffset(div1);
+  var off2 = getOffset(div2);
+  // find center of div1 (was bottom right)
+  var x1 = off1.left + off1.width/2;
+  var y1 = off1.top + off1.height/2;
+  // find center of div1 (was top right)
+  var x2 = off2.left + off2.width/2;
+  var y2 = off2.top + off2.height/2;
+
+  return buildWinningLine(thickness, color, x1, x2, y1, y2, hasStyle);
+}
+
+function buildWinningLine(thickness, color, x1, x2, y1, y2, hasStyle) {
+  var style = '';
+
+  if (hasStyle) {
+    style = '<style>' +
+      '.path {' +
+      '  stroke-dasharray: 1000;' +
+      '  stroke-dashoffset: 1000;' +
+      '  animation: dash 5s linear forwards;' +
+      '}' +
+
+      '@keyframes dash {' +
+      '  to {' +
+      '    stroke-dashoffset: 0;' +
+      '  }' +
+      '}' +
+    '</style>';
+  }
+
+  var htmlLineEl = document.createElement('div');
+  htmlLineEl.innerHTML =
+  '<svg class="winning-move"' +
+        ' width="100%" height="100%"' +
+        ' xmlns="http://www.w3.org/2000/svg" version="1.1"' +
+        ' style="' +
+          'position: absolute;' +
+          'top: 0;' +
+          'left: 0;' +
+        '">' +
+    style +
+    '<line class="path" ' +
+      'x1="' + x1 + '"' +
+      'x2="' + x2 + '"' +
+      'y1="' + y1 + '"' +
+      'y2="' + y2 + '"' +
+      'stroke="' + color + '"' +
+      'stroke-width="' + thickness + '" ' +
+      'stroke-linecap="round"' +
+    ' />' +
+  '</svg>';
+  return htmlLineEl.firstChild;
+}
+
+// ...
+
+
+function drawWinningLine() {
+  // ...
+  connect(possibleWinStates[key].cells[0], possibleWinStates[key].cells[1], 'green', 5, true)
+  // ...
+}
+
+// ...
+
+function resizeWinningLine(event) {
+  // ...
+  connect(possibleWinStates[key].cells[0], possibleWinStates[key].cells[1], 'green', 5, false)
+  // ...
+}
+```

@@ -260,49 +260,68 @@ function getOffset( el ) {
 // == Sourced:
 // - [javascript - How to draw a line between two divs? - Stack Overflow]
 //   (https://stackoverflow.com/questions/8672369/how-to-draw-a-line-between-two-divs)
-function connect(div1, div2, color, thickness) { // draw a line connecting elements
-  var padding = 3;
+function connect(div1, div2, color, thickness, hasStyle) { // draw a line connecting elements
   var off1 = getOffset(div1);
   var off2 = getOffset(div2);
   // find center of div1 (was bottom right)
-  var x1 = off1.left + off1.width/2 + padding;
-  var y1 = off1.top + off1.height/2 + padding;
+  var x1 = off1.left + off1.width/2;
+  var y1 = off1.top + off1.height/2;
   // find center of div1 (was top right)
-  var x2 = off2.left + off2.width/2 + padding;
-  var y2 = off2.top + off2.height/2 + padding;
-  // distance
-  var length = Math.sqrt(((x2-x1) * (x2-x1)) + ((y2-y1) * (y2-y1)));
-  // center
-  var cx = ((x1 + x2) / 2) - (length / 2);
-  var cy = ((y1 + y2) / 2) - (thickness / 2);
-  // angle
-  var angle = Math.atan2((y1-y2),(x1-x2))*(180/Math.PI);
-  // make hr
+  var x2 = off2.left + off2.width/2;
+  var y2 = off2.top + off2.height/2;
+
+  return buildWinningLine(thickness, color, x1, x2, y1, y2, hasStyle);
+}
+
+function buildWinningLine(thickness, color, x1, x2, y1, y2, hasStyle) {
+  var style = '';
+
+  if (hasStyle) {
+    style = '<style>' +
+      '.path {' +
+      '  stroke-dasharray: 1000;' +
+      '  stroke-dashoffset: 1000;' +
+      '  animation: dash 5s linear forwards;' +
+      '}' +
+
+      '@keyframes dash {' +
+      '  to {' +
+      '    stroke-dashoffset: 0;' +
+      '  }' +
+      '}' +
+    '</style>';
+  }
+
   var htmlLineEl = document.createElement('div');
-  htmlLineEl.classList.add('winning-move');
-  htmlLineEl.setAttribute('style',
-    "padding:0px; " +
-    "margin:0px; " +
-    "height:" + thickness + "px; " +
-    "background-color:" + color + "; " +
-    "line-height:1px; " +
-    "position:absolute; " +
-    "left:" + cx + "px; " +
-    "top:" + cy + "px; " +
-    "width:" + length + "px; " +
-    "-moz-transform:rotate(" + angle + "deg); " +
-    "-webkit-transform:rotate(" + angle + "deg); " +
-    "-o-transform:rotate(" + angle + "deg); " +
-    "-ms-transform:rotate(" + angle + "deg); " +
-    "transform:rotate(" + angle + "deg);'"
-  );
-  document.body.appendChild(htmlLineEl);
+  htmlLineEl.innerHTML =
+  '<svg class="winning-move"' +
+        ' width="100%" height="100%"' +
+        ' xmlns="http://www.w3.org/2000/svg" version="1.1"' +
+        ' style="' +
+          'position: absolute;' +
+          'top: 0;' +
+          'left: 0;' +
+        '">' +
+    style +
+    '<line class="path" ' +
+      'x1="' + x1 + '"' +
+      'x2="' + x2 + '"' +
+      'y1="' + y1 + '"' +
+      'y2="' + y2 + '"' +
+      'stroke="' + color + '"' +
+      'stroke-width="' + thickness + '" ' +
+      'stroke-linecap="round"' +
+    ' />' +
+  '</svg>';
+  return htmlLineEl.firstChild;
 }
 
 function drawWinningLine() {
   Object.keys(possibleWinStates).forEach(function (key) {
     if (possibleWinStates[key].draw) {
-      connect(possibleWinStates[key].cells[0], possibleWinStates[key].cells[1], 'green', 5);
+      document.body.appendChild(
+        connect(possibleWinStates[key].cells[0], possibleWinStates[key].cells[1], 'green', 5, true)
+      );
     }
   });
   chalkSfx.line.play();
@@ -313,8 +332,23 @@ function removeWinningLine() {
   if (lineEl) { document.body.removeChild(lineEl); }
 }
 
+function resizeWinningLine(event) {
+  var lineEl = document.querySelector('.winning-move');
+  if (lineEl) {
+    Object.keys(possibleWinStates).forEach(function (key) {
+      if (possibleWinStates[key].draw) {
+        lineEl.parentNode.replaceChild(
+          connect(possibleWinStates[key].cells[0], possibleWinStates[key].cells[1], 'green', 5, false),
+          lineEl
+        );
+      }
+    });
+  }
+}
+
 // document ready
 (function() {
+  window.addEventListener('resize', resizeWinningLine);
   board.addEventListener('click', placePiece);
 
   resetBoardBtn.addEventListener('click', resetBoard);
