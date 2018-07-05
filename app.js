@@ -201,7 +201,13 @@ function allCellsFull() {
   });
 }
 
-function updateScoreboard() {
+function updateScoreboard(winner) {
+  if (winner === 'tie') {
+    winnerEl.textContent = 'Draw!';
+  } else {
+    winnerEl.textContent = winner + ' Wins!';
+  }
+
   roundsEl.textContent = gameState.rounds;
   naughtWinsEl.textContent = gameState.wins.naught;
   crossWinsEl.textContent = gameState.wins.cross;
@@ -210,7 +216,7 @@ function updateScoreboard() {
 
 function updateWins(winner) {
   gameState.wins[winner]++;
-  updateScoreboard();
+  updateScoreboard(winner);
   gameState.running = false;
   storeGameState(gameState);
   detailsEl.classList.remove('hidden');
@@ -218,13 +224,11 @@ function updateWins(winner) {
 
 function onWin() {
   updateWins(player);
-  winnerEl.textContent = winner + ' Wins!';
   drawWinningLine();
 }
 
 function onTie() {
   updateWins('tie');
-  winnerEl.textContent = 'Draw!';
   chalkSfx.tie.play();
 }
 
