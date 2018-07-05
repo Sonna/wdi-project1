@@ -26,6 +26,12 @@ img.naught.fade-out {
   transition: opacity 1s ease-in-out;
 }
 
+input {
+  background-color: black;
+  color: white;
+  width: 100%;
+}
+
 .board {
   background-image: url('assets/images/blackboard.jpg');
   background-position: center center;

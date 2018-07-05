@@ -2,11 +2,16 @@ console.log('app.js loaded');
 
 var gameState = {};
 var defaultGameState = {
-  version: '2018-07-05_1300',
-  rounds: 0,
+  version: '2018-07-06_0924',
+  rounds: 1,
   players: {
     active: 'naught',
-    inactive: 'cross'
+    inactive: 'cross',
+
+    names: {
+      naught: 'Naughts',
+      cross: 'Crosses'
+    }
   },
 
   pieces: {
@@ -26,7 +31,8 @@ var defaultGameState = {
     [null, null, null]
   ],
 
-  running: true
+  running: true,
+  editing: true
 };
 
 function clearGameState() {
@@ -45,7 +51,12 @@ function restoreGameState() {
     rounds: localStorage.getItem('gameState-rounds'),
     players: {
       active: localStorage.getItem('gameState-players-active'),
-      inactive: localStorage.getItem('gameState-players-inactive')
+      inactive: localStorage.getItem('gameState-players-inactive'),
+
+      names: {
+        naught: localStorage.getItem('gameState-players-names-naught'),
+        cross: localStorage.getItem('gameState-players-names-cross')
+      }
     },
 
     pieces: {
@@ -70,6 +81,8 @@ function storeGameState(currentState) {
   localStorage.setItem('gameState-rounds', currentState.rounds);
   localStorage.setItem('gameState-players-active', currentState.players.active);
   localStorage.setItem('gameState-players-inactive', currentState.players.inactive);
+  localStorage.setItem('gameState-players-names-naught', currentState.players.names.naught);
+  localStorage.setItem('gameState-players-names-cross', currentState.players.names.cross);
   localStorage.setItem('gameState-pieces-cross', currentState.pieces.cross);
   localStorage.setItem('gameState-pieces-naught', currentState.pieces.naught);
   localStorage.setItem('gameState-wins-naught', currentState.wins.naught);
@@ -92,10 +105,17 @@ var resetBoardBtn = controls.querySelector('.reset-board');
 var resetScoresBtn = controls.querySelector('.reset-scores');
 var resetAllBtn = controls.querySelector('.reset-all');
 
-var winsEl = document.querySelector('.wins');
-var naughtWinsEl = winsEl.querySelector('.naught');
-var crossWinsEl = winsEl.querySelector('.cross');
-var tieWinsEl = winsEl.querySelector('.tie');
+// var winsEl = document.querySelector('.wins');
+var playersEl = document.querySelector('.players');
+// var playersList = {
+//   naught: playersEl.querySelector('.naught'),
+//   cross: playersEl.querySelector('.cross')
+// };
+
+var scoresEl = document.querySelector('.scores');
+var naughtWinsEl = scoresEl.querySelector('.naught');
+var crossWinsEl = scoresEl.querySelector('.cross');
+var tieWinsEl = scoresEl.querySelector('.tie');
 
 var possibleWinStates = {
   majorDiagonal: { draw: false, cells: [cells[0], cells[8]] },
@@ -149,10 +169,10 @@ function togglePlayerTurn() {
   var tempActive = gameState.players.active;
   var tempInactive = gameState.players.inactive;
 
-  gameState.players = {
+  gameState.players = Object.assign(gameState.players, {
     active: tempInactive,
     inactive: tempActive
-  };
+  });
 }
 
 function initializeBoard() {
@@ -161,7 +181,7 @@ function initializeBoard() {
       placePiece(cells[(rowsIndex * row.length) + columnIndex], player);
     })
   });
-  checkForWinner(gameState.players.active);
+  checkForWinner(gameState.players.active, true);
 }
 
 function checkCols(player) {
@@ -205,38 +225,41 @@ function updateScoreboard(winner) {
   if (winner === 'tie') {
     winnerEl.textContent = 'Draw!';
   } else {
-    winnerEl.textContent = winner + ' Wins!';
+    winnerEl.textContent = gameState.players.names[winner] + ' Wins!';
   }
 
   roundsEl.textContent = gameState.rounds;
   naughtWinsEl.textContent = gameState.wins.naught;
   crossWinsEl.textContent = gameState.wins.cross;
   tieWinsEl.textContent = gameState.wins.tie;
+
+  playersEl.querySelector('.naught').textContent = gameState.players.names.naught;
+  playersEl.querySelector('.cross').textContent = gameState.players.names.cross;
 }
 
-function updateWins(winner) {
-  gameState.wins[winner]++;
+function updateWins(winner, onLoad) {
+  if (!onLoad) { gameState.wins[winner]++; }
   updateScoreboard(winner);
   gameState.running = false;
   storeGameState(gameState);
   detailsEl.classList.remove('hidden');
 }
 
-function onWin(player) {
-  updateWins(player);
+function onWin(player, onLoad) {
+  updateWins(player, onLoad);
   drawWinningLine();
 }
 
-function onTie() {
-  updateWins('tie');
+function onTie(onLoad) {
+  updateWins('tie', onLoad);
   chalkSfx.tie.play();
 }
 
-function checkForWinner(player) {
+function checkForWinner(player, onLoad) {
   if (checkCols(player) || checkRows(player) || checkDiagonals(player)) {
-    onWin(player);
+    onWin(player, onLoad);
   } else if (allCellsFull()) {
-    onTie();
+    onTie(onLoad);
   }
 }
 
@@ -404,10 +427,38 @@ function resizeWinningLine(event) {
   }
 }
 
+function editPlayerName(event) {
+  if (gameState.editing) { return; }
+  if (!event.target.classList.contains('naught') &&
+      !event.target.classList.contains('cross')) { return; }
+  var inputEl = document.createElement('input');
+  inputEl.value = event.target.textContent;
+  inputEl.className = event.target.className;
+  inputEl.addEventListener('blur', finishEditPlayerName);
+
+  event.target.parentNode.replaceChild(inputEl, event.target);
+  gameState.editing = true;
+}
+
+function finishEditPlayerName(event) {
+  if (!event.target.classList.contains('naught') &&
+      !event.target.classList.contains('cross')) { return; }
+  var spanEl = document.createElement('span');
+  spanEl.className = event.target.className;
+  spanEl.textContent = event.target.value;
+
+  gameState.players.names[event.target.className] = event.target.value;
+  storeGameState(gameState);
+
+  event.target.parentNode.replaceChild(spanEl, event.target);
+  gameState.editing = false;
+}
+
 // document ready
 (function() {
   window.addEventListener('resize', resizeWinningLine);
   board.addEventListener('click', playerTurn);
+  playersEl.addEventListener('click', editPlayerName);
 
   resetBoardBtn.addEventListener('click', resetBoard);
   resetScoresBtn.addEventListener('click', resetScores);
@@ -416,5 +467,5 @@ function resizeWinningLine(event) {
   initializeGameState();
   restoreGameState();
   initializeBoard();
-  updateScoreboard();
+  updateScoreboard(gameState.players.active);
 })();
