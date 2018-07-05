@@ -209,25 +209,30 @@ function updateScoreboard() {
 }
 
 function updateWins(winner) {
-  winnerEl.textContent = winner + ' Wins!';
   gameState.wins[winner]++;
   updateScoreboard();
+  gameState.running = false;
+  storeGameState(gameState);
+  detailsEl.classList.remove('hidden');
+}
+
+function onWin() {
+  updateWins(player);
+  winnerEl.textContent = winner + ' Wins!';
+  drawWinningLine();
+}
+
+function onTie() {
+  updateWins('tie');
+  winnerEl.textContent = 'Draw!';
+  chalkSfx.tie.play();
 }
 
 function checkForWinner(player) {
   if (checkCols(player) || checkRows(player) || checkDiagonals(player)) {
-    updateWins(player);
-    gameState.running = false;
-    storeGameState(gameState);
-    detailsEl.classList.remove('hidden');
-    drawWinningLine();
+    onWin();
   } else if (allCellsFull()) {
-    updateWins('tie');
-    chalkSfx.tie.play();
-    winnerEl.textContent = 'Draw!';
-    gameState.running = false;
-    detailsEl.classList.remove('hidden');
-    storeGameState(gameState);
+    onTie();
   }
 }
 
