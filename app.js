@@ -35,6 +35,7 @@ function initializeGameState() {
 
 function restoreGameState() {
   gameState = {
+    version: localStorage.getItem('gameState-version'),
     rounds: localStorage.getItem('gameState-rounds'),
     players: {
       active: localStorage.getItem('gameState-players-active'),
@@ -57,6 +58,7 @@ function restoreGameState() {
 };
 
 function storeGameState(currentState) {
+  localStorage.setItem('gameState-version', currentState.version);
   localStorage.setItem('gameState-rounds', currentState.rounds);
   localStorage.setItem('gameState-players-active', currentState.players.active);
   localStorage.setItem('gameState-players-inactive', currentState.players.inactive);
