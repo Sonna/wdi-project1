@@ -1476,4 +1476,211 @@ function buildWinningLine(thickness, color, x1, x2, y1, y2, hasStyle) {
 
 23. Fix persist state of the board
 
+_Fix a bug with forgetting to add `version` to game state_
+
+```javascript
+// app.js
+function restoreGameState() {
+  gameState = {
+    version: localStorage.getItem('gameState-version'),
+  // ...
+  };
+}
+
+// ...
+
+function storeGameState(currentState) {
+  localStorage.setItem('gameState-version', currentState.version);
+  // ...
+}
+```
+
+In order to capture the board state, lets add to the default board state with
+`null` values.
+
+```javascript
+// app.js
+var defaultGameState = {
+  // ...
+  board: [
+    [null, null, null],
+    [null, null, null],
+    [null, null, null]
+  ],
+  // ...
+};
+```
+
+However, in order to store that state within Local Storage it needs to be a
+String-like value. This means the data needs to be transformed when being stored
+and that transformation to be reverse when restored.
+
+- [javascript - How do I store an array in localStorage? - Stack Overflow](https://stackoverflow.com/questions/3357553/how-do-i-store-an-array-in-localstorage)
+
+```javascript
+// app.js
+
+function restoreGameState() {
+  gameState = {
+    // ...
+    board: JSON.parse(localStorage.getItem('gameState-board')),
+    // ...
+  };
+}
+
+function storeGameState(currentState) {
+  // ...
+  localStorage.setItem('gameState-board', JSON.stringify(currentState.board));
+  // ...
+};
+```
+
+However, to update the internal board to match the existing board I need to
+determine what row and column is being accessed. So rather than using some kind
+of logic to determine them, instead just insert the data into the document to
+reference later.
+
+```html
+<section class="board">
+  <section class="row">
+    <div class="cell" data-column="0" data-row="0"></div>
+    <div class="cell" data-column="1" data-row="0"></div>
+    <div class="cell" data-column="2" data-row="0"></div>
+  </section>
+
+  <section class="row">
+    <div class="cell" data-column="0" data-row="1"></div>
+    <div class="cell" data-column="1" data-row="1"></div>
+    <div class="cell" data-column="2" data-row="1"></div>
+  </section>
+
+  <section class="row">
+    <div class="cell" data-column="0" data-row="2"></div>
+    <div class="cell" data-column="1" data-row="2"></div>
+    <div class="cell" data-column="2" data-row="2"></div>
+  </section>
+</section>
+```
+
+- [Using data attributes - Learn web development | MDN](https://developer.mozilla.org/en-US/docs/Learn/HTML/Howto/Use_data_attributes)
+
+```javascript
+// app.js
+function placePiece(event) {
+  // ...
+  gameState.board[event.target.dataset.row][event.target.dataset.column] = gameState.players.active;
+  // ...
+  storeGameState(gameState);
+}
+```
+
+Add save state after each turn.
+
+Then clean the board after when board is cleared.
+
+```javascript
+// app.js
+
+function clearBoard() {
+  // ...
+  gameState.board = defaultGameState.board;
+  // ...
+}
+```
+
+Now the that the data is being stored there it means the `check` functions can
+be updated to use the `board` instead of referring back to the DOM.
+
+```javascript
+// app.js
+
+function checkCols(player) {
+  possibleWinStates.leftColumn.draw = gameState.board[0][0] === player && gameState.board[1][0] === player && gameState.board[2][0] === player;
+  possibleWinStates.middleColumn.draw = gameState.board[0][1] === player && gameState.board[1][1] === player && gameState.board[2][1] === player;
+  possibleWinStates.rightColumn.draw = gameState.board[0][2] === player && gameState.board[1][2] === player && gameState.board[2][2] === player;
+  return (
+    possibleWinStates.leftColumn.draw ||
+    possibleWinStates.middleColumn.draw ||
+    possibleWinStates.rightColumn.draw
+  );
+}
+
+function checkRows(player) {
+  possibleWinStates.topRow.draw = gameState.board[0][0] === player && gameState.board[0][1] === player && gameState.board[0][2] === player;
+  possibleWinStates.middleRow.draw = gameState.board[1][0] === player && gameState.board[1][1] === player && gameState.board[1][2] === player;
+  possibleWinStates.bottomRow.draw = gameState.board[2][0] === player && gameState.board[2][1] === player && gameState.board[2][2] === player;
+  return (
+    possibleWinStates.topRow.draw ||
+    possibleWinStates.middleRow.draw ||
+    possibleWinStates.bottomRow.draw
+  );
+}
+
+function checkDiagonals(player) {
+  possibleWinStates.majorDiagonal.draw = gameState.board[0][0] === player && gameState.board[1][1] === player && gameState.board[2][2] === player;
+  possibleWinStates.minorDiagonal.draw = gameState.board[2][0] === player && gameState.board[1][1] === player && gameState.board[0][2] === player;
+  return (
+    possibleWinStates.majorDiagonal.draw ||
+    possibleWinStates.minorDiagonal.draw
+  );
+}
+```
+
+Then finally, redrawing the board on refresh / loading of the page. First by
+refactoring the placing of pieces on the board and then calling it when
+redrawing the board.
+
+```javascript
+// app.js
+
+function placePiece(cell, player) {
+  if (!player) { return; }
+  var pieceEl = document.createElement('iframe');
+  pieceEl.classList.add('chalk');
+  pieceEl.classList.add(player);
+  pieceEl.src = gameState.pieces[player];
+  cell.appendChild(pieceEl);
+
+  cell.classList.add(player);
+  gameState.board[cell.dataset.row][cell.dataset.column] = player;
+}
+
+function playerTurn(event) {
+  if (!gameState.running) { return; }
+  if (!event.target.classList.contains('cell')) { return; }
+  if (event.target.classList.contains('naught') ||
+      event.target.classList.contains('cross')) { return; }
+
+  placePiece(event.target, gameState.players.active);
+
+  chalkSfx[gameState.players.active].play();
+  checkForWinner(gameState.players.active);
+  togglePlayerTurn();
+  storeGameState(gameState);
+}
+
+var cells = document.querySelectorAll('.cell');
+
+function initializeBoard() {
+  gameState.board.forEach(function(rows, rowsIndex) {
+    rows.forEach(function(player, columnIndex, row) {
+      placePiece(cells[(rowsIndex * row.length) + columnIndex], player);
+    })
+  });
+  checkForWinner(gameState.players.active);
+}
+
+// ...
+
+// document ready
+(function() {
+  // ...
+  initializeBoard();
+  restoreGameState();
+  initializeGameState();
+  updateScoreboard();
+})();
+
+```
+
 24. Allow User to Customize pieces

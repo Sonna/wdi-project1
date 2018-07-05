@@ -2,7 +2,7 @@ console.log('app.js loaded');
 
 var gameState = {};
 var defaultGameState = {
-  version: '2018-07-05_0858',
+  version: '2018-07-05_1300',
   rounds: 0,
   players: {
     active: 'naught',
@@ -19,6 +19,12 @@ var defaultGameState = {
     cross: 0,
     tie: 0
   },
+
+  board: [
+    [null, null, null],
+    [null, null, null],
+    [null, null, null]
+  ],
 
   running: true
 };
@@ -53,6 +59,8 @@ function restoreGameState() {
       tie: localStorage.getItem('gameState-wins-tie')
     },
 
+    board: JSON.parse(localStorage.getItem('gameState-board')),
+
     running: localStorage.getItem('gameState-running')
   };
 };
@@ -67,6 +75,7 @@ function storeGameState(currentState) {
   localStorage.setItem('gameState-wins-naught', currentState.wins.naught);
   localStorage.setItem('gameState-wins-cross', currentState.wins.cross);
   localStorage.setItem('gameState-wins-tie', currentState.wins.tie);
+  localStorage.setItem('gameState-board', JSON.stringify(currentState.board));
   localStorage.setItem('gameState-running', currentState.running);
 };
 
@@ -109,22 +118,30 @@ var chalkSfx = {
   tie: new Audio("assets/sfx/chalk-tie.mp3")
 };
 
-function placePiece(event) {
+function placePiece(cell, player) {
+  if (!player) { return; }
+  var pieceEl = document.createElement('iframe');
+  pieceEl.classList.add('chalk');
+  pieceEl.classList.add(player);
+  pieceEl.src = gameState.pieces[player];
+  cell.appendChild(pieceEl);
+
+  cell.classList.add(player);
+  gameState.board[cell.dataset.row][cell.dataset.column] = player;
+}
+
+function playerTurn(event) {
   if (!gameState.running) { return; }
   if (!event.target.classList.contains('cell')) { return; }
   if (event.target.classList.contains('naught') ||
       event.target.classList.contains('cross')) { return; }
 
-  var pieceEl = document.createElement('iframe');
-  pieceEl.classList.add('chalk');
-  pieceEl.classList.add(gameState.players.active);
-  pieceEl.src = gameState.pieces[gameState.players.active];
-  event.target.appendChild(pieceEl);
+  placePiece(event.target, gameState.players.active);
 
-  event.target.classList.add(gameState.players.active);
   chalkSfx[gameState.players.active].play();
   checkForWinner(gameState.players.active);
   togglePlayerTurn();
+  storeGameState(gameState);
 }
 
 function togglePlayerTurn() {
@@ -138,10 +155,19 @@ function togglePlayerTurn() {
   };
 }
 
+function initializeBoard() {
+  gameState.board.forEach(function(rows, rowsIndex) {
+    rows.forEach(function(player, columnIndex, row) {
+      placePiece(cells[(rowsIndex * row.length) + columnIndex], player);
+    })
+  });
+  checkForWinner(gameState.players.active);
+}
+
 function checkCols(player) {
-  possibleWinStates.leftColumn.draw = rows[0].children[0].classList.contains(player) && rows[1].children[0].classList.contains(player) && rows[2].children[0].classList.contains(player);
-  possibleWinStates.middleColumn.draw = rows[0].children[1].classList.contains(player) && rows[1].children[1].classList.contains(player) && rows[2].children[1].classList.contains(player);
-  possibleWinStates.rightColumn.draw = rows[0].children[2].classList.contains(player) && rows[1].children[2].classList.contains(player) && rows[2].children[2].classList.contains(player);
+  possibleWinStates.leftColumn.draw = gameState.board[0][0] === player && gameState.board[1][0] === player && gameState.board[2][0] === player;
+  possibleWinStates.middleColumn.draw = gameState.board[0][1] === player && gameState.board[1][1] === player && gameState.board[2][1] === player;
+  possibleWinStates.rightColumn.draw = gameState.board[0][2] === player && gameState.board[1][2] === player && gameState.board[2][2] === player;
   return (
     possibleWinStates.leftColumn.draw ||
     possibleWinStates.middleColumn.draw ||
@@ -150,9 +176,9 @@ function checkCols(player) {
 }
 
 function checkRows(player) {
-  possibleWinStates.topRow.draw = rows[0].children[0].classList.contains(player) && rows[0].children[1].classList.contains(player) && rows[0].children[2].classList.contains(player);
-  possibleWinStates.middleRow.draw = rows[1].children[0].classList.contains(player) && rows[1].children[1].classList.contains(player) && rows[1].children[2].classList.contains(player);
-  possibleWinStates.bottomRow.draw = rows[2].children[0].classList.contains(player) && rows[2].children[1].classList.contains(player) && rows[2].children[2].classList.contains(player);
+  possibleWinStates.topRow.draw = gameState.board[0][0] === player && gameState.board[0][1] === player && gameState.board[0][2] === player;
+  possibleWinStates.middleRow.draw = gameState.board[1][0] === player && gameState.board[1][1] === player && gameState.board[1][2] === player;
+  possibleWinStates.bottomRow.draw = gameState.board[2][0] === player && gameState.board[2][1] === player && gameState.board[2][2] === player;
   return (
     possibleWinStates.topRow.draw ||
     possibleWinStates.middleRow.draw ||
@@ -161,8 +187,8 @@ function checkRows(player) {
 }
 
 function checkDiagonals(player) {
-  possibleWinStates.majorDiagonal.draw = rows[0].children[0].classList.contains(player) && rows[1].children[1].classList.contains(player) && rows[2].children[2].classList.contains(player);
-  possibleWinStates.minorDiagonal.draw = rows[2].children[0].classList.contains(player) && rows[1].children[1].classList.contains(player) && rows[0].children[2].classList.contains(player);
+  possibleWinStates.majorDiagonal.draw = gameState.board[0][0] === player && gameState.board[1][1] === player && gameState.board[2][2] === player;
+  possibleWinStates.minorDiagonal.draw = gameState.board[2][0] === player && gameState.board[1][1] === player && gameState.board[0][2] === player;
   return (
     possibleWinStates.majorDiagonal.draw ||
     possibleWinStates.minorDiagonal.draw
@@ -212,6 +238,7 @@ function clearBoard() {
     if (piece) { piece.classList.add('fade-out'); }
   });
   detailsEl.classList.add('hidden');
+  gameState.board = defaultGameState.board;
   removeWinningLine();
   setTimeout(function() {
     cells.forEach(function(cell) {
@@ -353,7 +380,7 @@ function resizeWinningLine(event) {
 // document ready
 (function() {
   window.addEventListener('resize', resizeWinningLine);
-  board.addEventListener('click', placePiece);
+  board.addEventListener('click', playerTurn);
 
   resetBoardBtn.addEventListener('click', resetBoard);
   resetScoresBtn.addEventListener('click', resetScores);
@@ -361,5 +388,6 @@ function resizeWinningLine(event) {
 
   initializeGameState();
   restoreGameState();
+  initializeBoard();
   updateScoreboard();
 })();
