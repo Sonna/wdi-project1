@@ -1722,4 +1722,23 @@ function clearBoard() {
 
 ```
 
-25. Allow User to Customize pieces
+25. Refresh Button styles to fix their appearance on mobile devices
+
+```css
+/* style.css */
+.controls,
+.controls button {
+  width: 100%;
+}
+
+.controls button {
+  background-color: black;
+  border: 2px solid white;
+  color: white;
+  font-size: 18px;
+  padding: 5px 0;
+}
+
+```
+
+26. Allow User to Customize pieces

@@ -74,15 +74,17 @@ img.naught.fade-out {
   mask-image: url("assets/images/chalk.png");
 }
 
-.controls {
-  display: flex;
-  justify-content: space-around;
+.controls,
+.controls button {
+  width: 100%;
 }
 
 .controls button {
-  border: 1px solid black;
+  background-color: black;
+  border: 2px solid white;
+  color: white;
+  font-size: 18px;
   padding: 5px 0;
-  width: 80px;
 }
 
 .container {
