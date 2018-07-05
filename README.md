@@ -1683,4 +1683,43 @@ function initializeBoard() {
 
 ```
 
-24. Allow User to Customize pieces
+24. Fix a bug with Arrays between current and default game board states
+
+The Bug was being caused by the following line
+
+`gameState.board = defaultGameState.board`
+
+Since JavaScript passes Arrays by Reference, rather than by Value it meant the
+new board was being set to the old board between clearing boards. However, to
+avoid also invisible pieces appearing on the board, the click event is removed
+and reattached later after the previous pieces have faded from view.
+
+```javascript
+// app.js
+function clearBoard() {
+  board.removeEventListener('click', playerTurn);
+  gameState.running = false;
+  chalkSfx.erase.play();
+  cells.forEach(function(cell) {
+    var piece = cell.children[0];
+    if (piece) { piece.classList.add('fade-out'); }
+  });
+  detailsEl.classList.add('hidden');
+  gameState.board = defaultGameState.board.map((x) => x.slice());
+  removeWinningLine();
+
+  setTimeout(function() {
+    gameState.board = defaultGameState.board.map((x) => x.slice());
+    cells.forEach(function(cell) {
+      cell.classList.remove('naught');
+      cell.classList.remove('cross');
+      cell.innerHTML = ''; // Delete Children `img` elements
+    });
+    gameState.running = true;
+    board.addEventListener('click', playerTurn);
+  }, 1000);
+}
+
+```
+
+25. Allow User to Customize pieces

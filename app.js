@@ -232,21 +232,26 @@ function checkForWinner(player) {
 }
 
 function clearBoard() {
+  board.removeEventListener('click', playerTurn);
+  gameState.running = false;
   chalkSfx.erase.play();
   cells.forEach(function(cell) {
     var piece = cell.children[0];
     if (piece) { piece.classList.add('fade-out'); }
   });
   detailsEl.classList.add('hidden');
-  gameState.board = defaultGameState.board;
+  gameState.board = defaultGameState.board.map((x) => x.slice());
   removeWinningLine();
+
   setTimeout(function() {
+    gameState.board = defaultGameState.board.map((x) => x.slice());
     cells.forEach(function(cell) {
       cell.classList.remove('naught');
       cell.classList.remove('cross');
       cell.innerHTML = ''; // Delete Children `img` elements
     });
     gameState.running = true;
+    board.addEventListener('click', playerTurn);
   }, 1000);
 }
 
