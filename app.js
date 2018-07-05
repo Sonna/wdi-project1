@@ -240,9 +240,22 @@ function checkForWinner(player) {
   }
 }
 
+function cleanBoard() {
+  gameState.board = defaultGameState.board.map((x) => x.slice());
+  cells.forEach(function(cell) {
+    cell.classList.remove('naught');
+    cell.classList.remove('cross');
+    cell.innerHTML = ''; // Delete Children `img` elements
+  });
+}
+
 function clearBoard() {
-  board.removeEventListener('click', playerTurn);
-  gameState.running = false;
+  disableBoard();
+  clearBoardAnimation();
+  setTimeout(enableBoard, 1000);
+}
+
+function clearBoardAnimation() {
   chalkSfx.erase.play();
   cells.forEach(function(cell) {
     var piece = cell.children[0];
@@ -251,17 +264,17 @@ function clearBoard() {
   detailsEl.classList.add('hidden');
   gameState.board = defaultGameState.board.map((x) => x.slice());
   removeWinningLine();
+}
 
-  setTimeout(function() {
-    gameState.board = defaultGameState.board.map((x) => x.slice());
-    cells.forEach(function(cell) {
-      cell.classList.remove('naught');
-      cell.classList.remove('cross');
-      cell.innerHTML = ''; // Delete Children `img` elements
-    });
-    gameState.running = true;
-    board.addEventListener('click', playerTurn);
-  }, 1000);
+function disableBoard() {
+  board.removeEventListener('click', playerTurn);
+  gameState.running = false;
+}
+
+function enableBoard() {
+  cleanBoard();
+  gameState.running = true;
+  board.addEventListener('click', playerTurn);
 }
 
 function resetBoard() {
