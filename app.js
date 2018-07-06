@@ -422,7 +422,7 @@ function drawWinningLine() {
       );
     }
   });
-  chalkSfx.line.play();
+  if (!gameState.loading) { chalkSfx.line.play(); }
 }
 
 function removeWinningLine() {
