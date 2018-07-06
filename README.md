@@ -8,7 +8,7 @@ use the following link:
 _To see more involved thought and development process see the
 [steps undertaken document](steps_undertaken.md) for more details._
 
-![A screenshot of the Tic Tac Toe game](screenshot_2018-07-05_14.31.03.png)
+![A screenshot of the Tic Tac Toe game](screenshot_2018-07-06_13.45.44.png)
 
 ## Overview
 
