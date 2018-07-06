@@ -107,12 +107,7 @@ var resetBoardBtn = controls.querySelector('.reset-board');
 var resetScoresBtn = controls.querySelector('.reset-scores');
 var resetAllBtn = controls.querySelector('.reset-all');
 
-// var winsEl = document.querySelector('.wins');
 var playerPiecesEl = document.querySelector('.pieces');
-// var playerPiecesList = {
-//   naught: playerPiecesEl.querySelector('.naught'),
-//   cross: playerPiecesEl.querySelector('.cross')
-// };
 var playersEl = document.querySelector('.players');
 
 var scoresEl = document.querySelector('.scores');
@@ -459,7 +454,6 @@ function replaceBoarddPieces() {
     if (piece) {
       if (piece.classList.contains('naught')) { pieceClassName = 'naught'; }
       if (piece.classList.contains('cross')) { pieceClassName = 'cross'; }
-      // cell.replaceChild(buildPiece(pieceClassName, 'img'), piece);
       cell.innerHTML = '';
       cell.appendChild(buildPiece(pieceClassName, 'img'));
     }
@@ -491,7 +485,6 @@ function editPlayerPiece(event) {
   inputEl.id = 'file-input';
   inputEl.type = 'file';
   inputEl.accept = "image/png, image/jpeg";
-  // inputEl.value = event.target.src;
   inputEl.className = event.target.className;
   inputEl.addEventListener('change', finishEditPlayerPiece);
 
@@ -506,18 +499,12 @@ function finishEditPlayerPiece(event) {
   imgEl.className = event.target.className;
   imgEl.width = '50';
   imgEl.height = '50';
-  loadFileToImage(this, imgEl);
-  // imgEl.src = event.target.value;
 
-  // if (event.target.value && event.target.value !== '') {
-  //   gameState.pieces[event.target.className] = imgEl.getAttribute('src');
-  // }
+  loadFileToImage(this, imgEl);
+
   storeGameState(gameState);
 
   event.target.parentNode.replaceChild(imgEl, event.target);
-
-  // playerPiecesEl.querySelector('.cross').src = gameState.pieces.cross;
-
   gameState.editing = false;
 }
 
