@@ -194,9 +194,9 @@ function initializeBoard() {
 }
 
 function checkCols(player) {
-  possibleWinStates.leftColumn.draw = gameState.board[0][0] === player && gameState.board[1][0] === player && gameState.board[2][0] === player;
-  possibleWinStates.middleColumn.draw = gameState.board[0][1] === player && gameState.board[1][1] === player && gameState.board[2][1] === player;
-  possibleWinStates.rightColumn.draw = gameState.board[0][2] === player && gameState.board[1][2] === player && gameState.board[2][2] === player;
+  possibleWinStates.leftColumn.draw = [gameState.board[0][0], gameState.board[1][0], gameState.board[2][0]].every((x) => x === player);
+  possibleWinStates.middleColumn.draw = [[0, 1], [1, 1], [2, 1]].every((x) => gameState.board[x[0]][x[1]] === player);
+  possibleWinStates.rightColumn.draw = [[0, 2], [1, 2], [2, 2]].every(([x, y]) => gameState.board[x][y] === player);
   return (
     possibleWinStates.leftColumn.draw ||
     possibleWinStates.middleColumn.draw ||
@@ -205,9 +205,9 @@ function checkCols(player) {
 }
 
 function checkRows(player) {
-  possibleWinStates.topRow.draw = gameState.board[0][0] === player && gameState.board[0][1] === player && gameState.board[0][2] === player;
-  possibleWinStates.middleRow.draw = gameState.board[1][0] === player && gameState.board[1][1] === player && gameState.board[1][2] === player;
-  possibleWinStates.bottomRow.draw = gameState.board[2][0] === player && gameState.board[2][1] === player && gameState.board[2][2] === player;
+  possibleWinStates.topRow.draw = [[0, 0], [0, 1], [0, 2]].every(([x, y]) => gameState.board[x][y] === player);
+  possibleWinStates.middleRow.draw = [[1, 0], [1, 1], [1, 2]].every(([x, y]) => gameState.board[x][y] === player);
+  possibleWinStates.bottomRow.draw = [[2, 0], [2, 1], [2, 2]].every(([x, y]) => gameState.board[x][y] === player);
   return (
     possibleWinStates.topRow.draw ||
     possibleWinStates.middleRow.draw ||
@@ -216,8 +216,8 @@ function checkRows(player) {
 }
 
 function checkDiagonals(player) {
-  possibleWinStates.majorDiagonal.draw = gameState.board[0][0] === player && gameState.board[1][1] === player && gameState.board[2][2] === player;
-  possibleWinStates.minorDiagonal.draw = gameState.board[2][0] === player && gameState.board[1][1] === player && gameState.board[0][2] === player;
+  possibleWinStates.majorDiagonal.draw = [[0, 0], [1, 1], [2, 2]].every(([x, y]) => gameState.board[x][y] === player);
+  possibleWinStates.minorDiagonal.draw = [[2, 0], [1, 1], [0, 2]].every(([x, y]) => gameState.board[x][y] === player);
   return (
     possibleWinStates.majorDiagonal.draw ||
     possibleWinStates.minorDiagonal.draw
@@ -333,7 +333,7 @@ function resetScores() {
 
 function resetAll() {
   clearBoard();
-  storeGameState(defaultGameState);
+  clearGameState();
   restoreGameState();
   updateScoreboard();
 }
