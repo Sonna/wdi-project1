@@ -142,8 +142,7 @@ function buildPiece(player, type) {
     pieceEl = document.createElement('iframe');
   } else {
     pieceEl = document.createElement('img');
-    pieceEl.width = '50';
-    pieceEl.height = '50';
+    pieceEl.style = 'height:50%;width:50%;';
   }
 
   pieceEl.classList.add('chalk');
@@ -251,11 +250,9 @@ function updateScoreboard(winner) {
   playersEl.querySelector('.cross').textContent = gameState.players.names.cross;
 
   playerPiecesEl.querySelector('.naught').src = gameState.pieces.naught;
-  playerPiecesEl.querySelector('.naught').height = 50;
-  playerPiecesEl.querySelector('.naught').width = 50;
+  // playerPiecesEl.querySelector('.naught').style = 'height:50%;width:50%;';
   playerPiecesEl.querySelector('.cross').src = gameState.pieces.cross;
-  playerPiecesEl.querySelector('.cross').height = 50;
-  playerPiecesEl.querySelector('.cross').width = 50;
+  // playerPiecesEl.querySelector('.cross').style = 'height:50%;width:50%;';
 }
 
 function updateWins(winner) {
