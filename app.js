@@ -108,11 +108,12 @@ var resetScoresBtn = controls.querySelector('.reset-scores');
 var resetAllBtn = controls.querySelector('.reset-all');
 
 // var winsEl = document.querySelector('.wins');
-var playersEl = document.querySelector('.players');
-// var playersList = {
-//   naught: playersEl.querySelector('.naught'),
-//   cross: playersEl.querySelector('.cross')
+var playerPiecesEl = document.querySelector('.pieces');
+// var playerPiecesList = {
+//   naught: playerPiecesEl.querySelector('.naught'),
+//   cross: playerPiecesEl.querySelector('.cross')
 // };
+var playersEl = document.querySelector('.players');
 
 var scoresEl = document.querySelector('.scores');
 var naughtWinsEl = scoresEl.querySelector('.naught');
@@ -140,14 +141,26 @@ var chalkSfx = {
   tie: new Audio("assets/sfx/chalk-tie.mp3")
 };
 
-function placePiece(cell, player) {
-  if (!player) { return; }
-  var pieceEl = document.createElement('iframe');
+function buildPiece(player, type) {
+  var pieceEl;
+  if (type !== 'img' && gameState.pieces[player] === defaultGameState.pieces[player]) {
+    pieceEl = document.createElement('iframe');
+  } else {
+    pieceEl = document.createElement('img');
+    pieceEl.width = '50';
+    pieceEl.height = '50';
+  }
+
   pieceEl.classList.add('chalk');
   pieceEl.classList.add(player);
   pieceEl.src = gameState.pieces[player];
-  cell.appendChild(pieceEl);
+  return pieceEl;
+}
 
+function placePiece(cell, player) {
+  if (!player) { return; }
+  var pieceEl = buildPiece(player);
+  cell.appendChild(pieceEl);
   cell.classList.add(player);
   gameState.board[cell.dataset.row][cell.dataset.column] = player;
 }
@@ -241,6 +254,13 @@ function updateScoreboard(winner) {
 
   playersEl.querySelector('.naught').textContent = gameState.players.names.naught;
   playersEl.querySelector('.cross').textContent = gameState.players.names.cross;
+
+  playerPiecesEl.querySelector('.naught').src = gameState.pieces.naught;
+  playerPiecesEl.querySelector('.naught').height = 50;
+  playerPiecesEl.querySelector('.naught').width = 50;
+  playerPiecesEl.querySelector('.cross').src = gameState.pieces.cross;
+  playerPiecesEl.querySelector('.cross').height = 50;
+  playerPiecesEl.querySelector('.cross').width = 50;
 }
 
 function updateWins(winner) {
@@ -286,7 +306,7 @@ function clearBoard() {
 function clearBoardAnimation() {
   chalkSfx.erase.play();
   cells.forEach(function(cell) {
-    var piece = cell.children[0];
+    var piece = cell.firstChild;
     if (piece) { piece.classList.add('fade-out'); }
   });
   winnerEl.innerHTML = '&nbsp;';
@@ -432,6 +452,75 @@ function resizeWinningLine(event) {
   }
 }
 
+function replaceBoarddPieces() {
+  cells.forEach(function(cell) {
+    var piece = cell.firstChild;
+    var pieceClassName;
+    if (piece) {
+      if (piece.classList.contains('naught')) { pieceClassName = 'naught'; }
+      if (piece.classList.contains('cross')) { pieceClassName = 'cross'; }
+      // cell.replaceChild(buildPiece(pieceClassName, 'img'), piece);
+      cell.innerHTML = '';
+      cell.appendChild(buildPiece(pieceClassName, 'img'));
+    }
+  });
+}
+
+function loadFileToImage(input, element) {
+  if (input.files && input.files[0]) {
+    var reader = new FileReader();
+
+    reader.onload = function(e) {
+      element.setAttribute('src', e.target.result);
+      if (e.target.result && e.target.result !== '') {
+        gameState.pieces[element.className] = e.target.result;
+        replaceBoarddPieces();
+      }
+    }
+
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+function editPlayerPiece(event) {
+  if (gameState.editing) { return; }
+  if (!event.target.classList.contains('naught') &&
+      !event.target.classList.contains('cross')) { return; }
+
+  var inputEl = document.createElement('input');
+  inputEl.id = 'file-input';
+  inputEl.type = 'file';
+  inputEl.accept = "image/png, image/jpeg";
+  // inputEl.value = event.target.src;
+  inputEl.className = event.target.className;
+  inputEl.addEventListener('change', finishEditPlayerPiece);
+
+  event.target.parentNode.replaceChild(inputEl, event.target);
+  gameState.editing = true;
+}
+
+function finishEditPlayerPiece(event) {
+  if (!event.target.classList.contains('naught') &&
+      !event.target.classList.contains('cross')) { return; }
+  var imgEl = document.createElement('img');
+  imgEl.className = event.target.className;
+  imgEl.width = '50';
+  imgEl.height = '50';
+  loadFileToImage(this, imgEl);
+  // imgEl.src = event.target.value;
+
+  // if (event.target.value && event.target.value !== '') {
+  //   gameState.pieces[event.target.className] = imgEl.getAttribute('src');
+  // }
+  storeGameState(gameState);
+
+  event.target.parentNode.replaceChild(imgEl, event.target);
+
+  // playerPiecesEl.querySelector('.cross').src = gameState.pieces.cross;
+
+  gameState.editing = false;
+}
+
 function editPlayerName(event) {
   if (gameState.editing) { return; }
   if (!event.target.classList.contains('naught') &&
@@ -463,6 +552,7 @@ function finishEditPlayerName(event) {
 (function() {
   window.addEventListener('resize', resizeWinningLine);
   board.addEventListener('click', playerTurn);
+  playerPiecesEl.addEventListener('click', editPlayerPiece);
   playersEl.addEventListener('click', editPlayerName);
 
   resetBoardBtn.addEventListener('click', resetBoard);
