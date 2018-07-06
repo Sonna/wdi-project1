@@ -30,6 +30,8 @@ Build the Tic Tac Toe game as web application for two players
 - JavaScript
 - SVG
 - Local Storage
+- Git
+- GitHub.com & GitHub Pages
 
 ## Features
 
@@ -53,12 +55,62 @@ Build the Tic Tac Toe game as web application for two players
  7. ... ?
  8. Profit!
 
+There was not much planning outside of the code, since it was a well known game
+/ problem, and most planning was done through the code in terms of layout,
+presentation and then functionality.
+
 ## Things learned
 
 - Using LocalStorage directly, rather than indirectly as in previous projects
 - Including `svg` as assets from external files, rather than inlined
 - Web Audio objects
 - Refresher of the JavaScript basics
+
+## Unsolved/Unresolved Problems
+
+- The use of `svg` was neat for creating self-contained animations, but required
+  `iframe` element for the animation to be replayed for each new instance. This
+  could be resolve by building the `svg` element each time, but loses the
+  advantage of being asset. Maybe using `canvas` and elements could resolve this
+  issue, but would still push animations into the JavaScript, which I was trying
+  to avoid.
+
+- Scaling `iframe` within the board is not possible, if they were images or
+  inlined `svg` they could better scale within the page. If they using an `img`
+  tag then the following rules could be applied to easily scale the board
+
+  ```css
+    /* style.css */
+    @media (min-width: 600px) {
+      iframe.cross,
+      iframe.naught,
+      img.cross,
+      img.naught {
+        left: 20%;
+        top: 20%;
+        height: 15vw;
+        width: 15vw;
+      }
+    }
+
+    @media (min-width: 600px) {
+      .cell {
+        height: 25vw;
+        width: 25vw;
+      }
+    }
+  ```
+
+## Future design plans
+
+If I were to continue developing this further, besides resolving the unresolved
+issues, I would look at refactoring and separating code dealing with building vs
+updating state of the board into separate scripts. If the `Board` became object
+have better handling of its state, deactivating or reactivating functions
+between states, and animations or loading in process.
+
+However, any more updates tend to drift further and further away from the
+original problem and where it is now should be just fine.
 
 ## Acknowledgements
 
