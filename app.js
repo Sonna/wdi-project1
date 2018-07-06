@@ -32,7 +32,8 @@ var defaultGameState = {
   ],
 
   running: true,
-  editing: true
+  editing: true,
+  loading: false
 };
 
 function clearGameState() {
@@ -40,13 +41,14 @@ function clearGameState() {
 }
 
 function initializeGameState() {
+  gameState.loading = true;
   if (localStorage.getItem('gameState-version') !== defaultGameState.version) {
     clearGameState();
   }
 }
 
 function restoreGameState() {
-  gameState = {
+  gameState = Object.assign(gameState, {
     version: localStorage.getItem('gameState-version'),
     rounds: localStorage.getItem('gameState-rounds'),
     players: {
@@ -73,7 +75,7 @@ function restoreGameState() {
     board: JSON.parse(localStorage.getItem('gameState-board')),
 
     running: localStorage.getItem('gameState-running')
-  };
+  });
 };
 
 function storeGameState(currentState) {
@@ -222,10 +224,14 @@ function allCellsFull() {
 }
 
 function updateScoreboard(winner) {
-  if (winner === 'tie') {
-    winnerEl.textContent = 'Draw!';
+  if (!gameState.loading) {
+    if (winner === 'tie') {
+      winnerEl.textContent = 'Draw!';
+    } else if (gameState.players.names[winner]) {
+      winnerEl.textContent = gameState.players.names[winner] + ' Wins!';
+    }
   } else {
-    winnerEl.textContent = gameState.players.names[winner] + ' Wins!';
+    winnerEl.innerHTML = '&nbsp;';
   }
 
   roundsEl.textContent = gameState.rounds;
@@ -237,29 +243,28 @@ function updateScoreboard(winner) {
   playersEl.querySelector('.cross').textContent = gameState.players.names.cross;
 }
 
-function updateWins(winner, onLoad) {
-  if (!onLoad) { gameState.wins[winner]++; }
+function updateWins(winner) {
+  if (!gameState.loading) { gameState.wins[winner]++; }
   updateScoreboard(winner);
   gameState.running = false;
   storeGameState(gameState);
-  detailsEl.classList.remove('hidden');
 }
 
-function onWin(player, onLoad) {
-  updateWins(player, onLoad);
+function onWin(player) {
+  updateWins(player);
   drawWinningLine();
 }
 
 function onTie(onLoad) {
-  updateWins('tie', onLoad);
+  updateWins('tie');
   chalkSfx.tie.play();
 }
 
-function checkForWinner(player, onLoad) {
+function checkForWinner(player) {
   if (checkCols(player) || checkRows(player) || checkDiagonals(player)) {
-    onWin(player, onLoad);
+    onWin(player);
   } else if (allCellsFull()) {
-    onTie(onLoad);
+    onTie();
   }
 }
 
@@ -284,7 +289,7 @@ function clearBoardAnimation() {
     var piece = cell.children[0];
     if (piece) { piece.classList.add('fade-out'); }
   });
-  detailsEl.classList.add('hidden');
+  winnerEl.innerHTML = '&nbsp;';
   gameState.board = defaultGameState.board.map((x) => x.slice());
   removeWinningLine();
 }
@@ -468,4 +473,6 @@ function finishEditPlayerName(event) {
   restoreGameState();
   initializeBoard();
   updateScoreboard(gameState.players.active);
+
+  gameState.loading = false;
 })();
